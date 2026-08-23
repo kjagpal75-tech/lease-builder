@@ -405,7 +405,7 @@ export default function LeaseBuilder() {
                           <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Southwest Gas (Gas)')} onChange={(e) => handleUtilityCheck('Southwest Gas (Gas)', e.target.checked)} />
                           <div>
                             <span className="font-medium">Southwest Gas (Gas)</span>
-                            <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
+                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
                           </div>
                         </li>
                         <li className="flex items-start gap-2">
@@ -413,13 +413,6 @@ export default function LeaseBuilder() {
                           <div>
                             <span className="font-medium">Tahoe Truckee Sierra Disposal (Trash)</span>
                             <p className="text-xs text-green-600">Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Spectrum / AT&T (Internet)')} onChange={(e) => handleUtilityCheck('Spectrum / AT&T (Internet)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Spectrum / AT&T (Internet)</span>
-                            <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
                           </div>
                         </li>
                       </>
@@ -451,13 +444,6 @@ export default function LeaseBuilder() {
                           <div>
                             <span className="font-medium">Waste Management (Trash)</span>
                             <p className="text-xs text-green-600">Phone: (775) 329-8822 | www.wm.com</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Spectrum / AT&T (Internet)')} onChange={(e) => handleUtilityCheck('Spectrum / AT&T (Internet)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Spectrum / AT&T (Internet)</span>
-                            <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
                           </div>
                         </li>
                       </>
