@@ -147,6 +147,13 @@ export default function DocumentAttachments({
                 <div className="flex gap-2 ml-4 shrink-0">
                   <button
                     type="button"
+                    onClick={() => window.open(attachment.data, '_blank')}
+                    className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                  >
+                    Preview
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => downloadAttachment(attachment, index)}
                     className="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                   >
