@@ -433,9 +433,9 @@ export default function LeaseBuilder() {
                           </div>
                         </li>
                         <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Southwest Gas (Gas)')} onChange={(e) => handleUtilityCheck('Southwest Gas (Gas)', e.target.checked)} />
+                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('NV Energy (Gas)')} onChange={(e) => handleUtilityCheck('NV Energy (Gas)', e.target.checked)} />
                           <div>
-                            <span className="font-medium">Southwest Gas (Gas)</span>
+                            <span className="font-medium">NV Energy (Gas)</span>
                             <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
                           </div>
                         </li>
