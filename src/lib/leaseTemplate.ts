@@ -192,6 +192,23 @@ ${stateClauses.join('\n')}
 
 ${disclosuresSection}
 
+ADDENDUM — UTILITY COMPANY CHECKLIST
+The following utility companies apply to the property. Tenant and Landlord should verify contact information and set up accounts before move-in.
+
+RENO, NV
+- NV Energy (Electric) — Phone: (775) 834-4444 | www.nvenergy.com
+- Truckee Meadows Water Authority (Water) — Phone: (775) 834-8080 | www.tmwa.com
+- Southwest Gas (Gas) — Phone: (877) 860-6020 | www.swgas.com
+- Waste Management (Trash) — Phone: (775) 329-8822 | www.wm.com
+- Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com
+
+TRUCKEE, CA
+- Tahoe Public Utility District (Electric) — Phone: (530) 587-3896 | www.tdpud.org
+- Truckee Donner PUD (Water) — Phone: (530) 587-3896 | www.tdpud.org
+- Southwest Gas (Gas) — Phone: (877) 860-6020 | www.swgas.com
+- Tahoe Truckee Sierra Disposal (Trash) — Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com
+- Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com
+
 IN WITNESS WHEREOF, the parties have executed this Lease as of the date first written above.
 
 ${landlords.map((landlord, index) => {

@@ -102,6 +102,8 @@ export interface LeaseTerms {
   utilitiesReimbursed?: string[];
   /** Monthly reimbursement amount per utility (if fixed) */
   utilityReimbursementAmounts?: Record<string, number>;
+  /** Utilities checked by tenant/landlord for setup */
+  checkedUtilities?: string[];
 }
 
 export interface Signature {
