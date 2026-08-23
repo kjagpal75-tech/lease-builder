@@ -372,35 +372,35 @@ export default function LeaseBuilder() {
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">NV Energy (Electric)</span>
-                          <p className="text-xs text-green-600">Phone: (775) 834-4444</p>
+                          <p className="text-xs text-green-600">Phone: (775) 834-4444 | www.nvenergy.com</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Truckee Meadows Water Authority (Water)</span>
-                          <p className="text-xs text-green-600">Phone: (775) 834-8080</p>
+                          <p className="text-xs text-green-600">Phone: (775) 834-8080 | www.tmwa.com</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Southwest Gas (Gas)</span>
-                          <p className="text-xs text-green-600">Phone: (877) 860-6020</p>
+                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Waste Management (Trash)</span>
-                          <p className="text-xs text-green-600">Phone: (775) 329-8822</p>
+                          <p className="text-xs text-green-600">Phone: (775) 329-8822 | www.wm.com</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Spectrum / AT&T (Internet)</span>
-                          <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</p>
+                          <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
                         </div>
                       </li>
                     </ul>
@@ -419,28 +419,28 @@ export default function LeaseBuilder() {
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Truckee Donner PUD (Water)</span>
-                          <p className="text-xs text-green-600">Phone: (530) 587-3896</p>
+                          <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Southwest Gas (Gas)</span>
-                          <p className="text-xs text-green-600">Phone: (877) 860-6020</p>
+                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Tahoe Truckee Sierra Disposal (Trash)</span>
-                          <p className="text-xs text-green-600">Phone: (530) 583-7800</p>
+                          <p className="text-xs text-green-600">Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <input type="checkbox" className="mt-0.5" />
                         <div>
                           <span className="font-medium">Spectrum / AT&T (Internet)</span>
-                          <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</p>
+                          <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
                         </div>
                       </li>
                     </ul>
