@@ -111,6 +111,24 @@ export default function LeaseBuilder() {
     }
   };
 
+  const handleUtilityCheck = (utility: string, checked: boolean) => {
+    if (!currentLease) return;
+    const currentChecked = currentLease.terms.checkedUtilities || [];
+    const updated = checked
+      ? [...currentChecked, utility]
+      : currentChecked.filter(u => u !== utility);
+    const updatedLease = {
+      ...currentLease,
+      terms: {
+        ...currentLease.terms,
+        checkedUtilities: updated,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+    setCurrentLease(updatedLease);
+    storageService.saveLease(updatedLease);
+  };
+
   const handleNewLease = () => {
     setCurrentLease(null);
     setView('form');
@@ -370,7 +388,7 @@ export default function LeaseBuilder() {
                     {currentLease?.property?.city === 'Truckee' ? (
                       <>
                         <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" />
+                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Tahoe Public Utility District (Electric)')} onChange={(e) => handleUtilityCheck('Tahoe Public Utility District (Electric)', e.target.checked)} />
                           <div>
                             <span className="font-medium">Tahoe Public Utility District (Electric)</span>
                             <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
