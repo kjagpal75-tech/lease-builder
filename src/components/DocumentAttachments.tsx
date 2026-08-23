@@ -13,6 +13,7 @@ export default function DocumentAttachments({
   onAttachmentsChange 
 }: DocumentAttachmentsProps) {
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,7 +148,7 @@ export default function DocumentAttachments({
                 <div className="flex gap-2 ml-4 shrink-0">
                   <button
                     type="button"
-                    onClick={() => window.open(attachment.data, '_blank')}
+                    onClick={() => setPreviewUrl(attachment.data)}
                     className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
                   >
                     Preview
@@ -173,6 +174,19 @@ export default function DocumentAttachments({
         </div>
       )}
 
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h4 className="font-semibold">Document Preview</h4>
+              <button onClick={() => setPreviewUrl(null)} className="text-gray-500 hover:text-gray-800">✕</button>
+            </div>
+            <div className="flex-1 overflow-auto p-2">
+              <iframe src={previewUrl} className="w-full h-[70vh]" title="Preview" />
+            </div>
+          </div>
+        </div>
+      )}
       {attachments.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <p className="text-sm">No attachments yet</p>
