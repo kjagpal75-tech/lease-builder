@@ -176,13 +176,13 @@ export default function DocumentAttachments({
 
       {previewUrl && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] flex flex-col">
             <div className="flex justify-between items-center p-4 border-b">
               <h4 className="font-semibold">Document Preview</h4>
               <button onClick={() => setPreviewUrl(null)} className="text-gray-500 hover:text-gray-800">✕</button>
             </div>
             <div className="flex-1 overflow-auto p-2">
-              <iframe src={previewUrl} className="w-full h-[70vh]" title="Preview" />
+              <iframe src={previewUrl} className="w-full h-[84vh]" title="Preview" />
             </div>
           </div>
         </div>
