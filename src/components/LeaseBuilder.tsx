@@ -364,87 +364,87 @@ export default function LeaseBuilder() {
                 <h3 className="text-base font-semibold text-green-900 mb-3">Utility Company Checklist</h3>
                 <p className="text-xs text-green-700 mb-3">Applicable for Reno NV and Truckee CA — verify contact info and set up accounts before move-in.</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-bold text-green-800 mb-2">Reno, NV</h4>
-                    <ul className="text-sm text-green-800 space-y-2">
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">NV Energy (Electric)</span>
-                          <p className="text-xs text-green-600">Phone: (775) 834-4444 | www.nvenergy.com</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Truckee Meadows Water Authority (Water)</span>
-                          <p className="text-xs text-green-600">Phone: (775) 834-8080 | www.tmwa.com</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Southwest Gas (Gas)</span>
-                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Waste Management (Trash)</span>
-                          <p className="text-xs text-green-600">Phone: (775) 329-8822 | www.wm.com</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Spectrum / AT&T (Internet)</span>
-                          <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-green-800 mb-2">Truckee, CA</h4>
-                    <ul className="text-sm text-green-800 space-y-2">
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Tahoe Public Utility District (Electric)</span>
-                          <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Truckee Donner PUD (Water)</span>
-                          <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Southwest Gas (Gas)</span>
-                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Tahoe Truckee Sierra Disposal (Trash)</span>
-                          <p className="text-xs text-green-600">Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <input type="checkbox" className="mt-0.5" />
-                        <div>
-                          <span className="font-medium">Spectrum / AT&T (Internet)</span>
-                          <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
+                <div>
+                  <h4 className="text-sm font-bold text-green-800 mb-2">{currentLease?.property?.city === 'Truckee' ? 'Truckee, CA' : 'Reno, NV'}</h4>
+                  <ul className="text-sm text-green-800 space-y-2">
+                    {currentLease?.property?.city === 'Truckee' ? (
+                      <>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Tahoe Public Utility District (Electric)</span>
+                            <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Truckee Donner PUD (Water)</span>
+                            <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Southwest Gas (Gas)</span>
+                            <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Tahoe Truckee Sierra Disposal (Trash)</span>
+                            <p className="text-xs text-green-600">Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Spectrum / AT&T (Internet)</span>
+                            <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
+                          </div>
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">NV Energy (Electric)</span>
+                            <p className="text-xs text-green-600">Phone: (775) 834-4444 | www.nvenergy.com</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Truckee Meadows Water Authority (Water)</span>
+                            <p className="text-xs text-green-600">Phone: (775) 834-8080 | www.tmwa.com</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Southwest Gas (Gas)</span>
+                            <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Waste Management (Trash)</span>
+                            <p className="text-xs text-green-600">Phone: (775) 329-8822 | www.wm.com</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <input type="checkbox" className="mt-0.5" />
+                          <div>
+                            <span className="font-medium">Spectrum / AT&T (Internet)</span>
+                            <p className="text-xs text-green-600">Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com</p>
+                          </div>
+                        </li>
+                      </>
+                    )}
+                  </ul>
                 </div>
               </div>
             </div>
