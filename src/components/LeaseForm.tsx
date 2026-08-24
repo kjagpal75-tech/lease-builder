@@ -1296,12 +1296,41 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                               count: Math.max(1, parseInt(e.target.value, 10) || 1),
                             };
                             handleTermsChange('pets', pets as LeasePet[]);
-                            // Update total rent when pets change for prepaid leases
                             if (terms.paymentSchedule === 'prepaid') {
                               const newPetRentTotal = totalLeasePetRent({ ...terms, pets });
                               handleTermsChange('totalRent', baseRent + newPetRentTotal);
                             }
                           }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+                        />
+                      </div>
+                      <div className="w-32">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Breed</label>
+                        <input
+                          type="text"
+                          value={pet.breed || ''}
+                          onChange={(e) => {
+                            const pets = [...(terms.pets || [])];
+                            pets[index] = { ...pets[index], breed: e.target.value };
+                            handleTermsChange('pets', pets as LeasePet[]);
+                          }}
+                          placeholder="e.g. Golden Retriever"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+                        />
+                      </div>
+                      <div className="w-20">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Age</label>
+                        <input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={pet.age || ''}
+                          onChange={(e) => {
+                            const pets = [...(terms.pets || [])];
+                            pets[index] = { ...pets[index], age: parseInt(e.target.value, 10) || undefined };
+                            handleTermsChange('pets', pets as LeasePet[]);
+                          }}
+                          placeholder="Years"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
                         />
                       </div>
@@ -1395,6 +1424,22 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                       }
                       return 'Total pet rent = rate × number of pets';
                     })()}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Non-Refundable Pet Fee ($ one-time)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={terms.nonRefundableFee || ''}
+                    onChange={(e) => handleTermsChange('nonRefundableFee', parseFloat(e.target.value) || undefined)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    One-time fee for professional carpet cleaning and deodorization upon move-out.
                   </p>
                 </div>
               </div>

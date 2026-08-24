@@ -25,6 +25,8 @@ export function normalizeLeaseTerms(terms?: Partial<LeaseTerms>): LeaseTerms {
     .map((p) => ({
       type: (p.type || '').trim(),
       count: Math.max(1, Number(p.count) || 1),
+      breed: p.breed || undefined,
+      age: p.age ? Number(p.age) : undefined,
     }))
     .filter((p) => p.type.length > 0);
   

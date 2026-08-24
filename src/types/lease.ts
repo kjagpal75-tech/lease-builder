@@ -58,6 +58,8 @@ export type HoldingDepositApplication =
 export interface LeasePet {
   type: string;
   count: number;
+  breed?: string;
+  age?: number;
 }
 
 export interface LeaseTerms {
@@ -95,6 +97,8 @@ export interface LeaseTerms {
   petDeposit?: number;
   /** Monthly pet rent charged per pet */
   petRent?: number;
+  /** One-time non-refundable pet fee (e.g., for carpet cleaning) */
+  nonRefundableFee?: number;
   occupants: string[];
   utilitiesIncluded: string[];
   utilitiesTenantResponsible: string[];

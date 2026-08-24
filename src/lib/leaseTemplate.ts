@@ -145,20 +145,41 @@ ${terms.occupants.length > 0 && terms.occupants[0] ? terms.occupants.map((occupa
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '7' : '6'}. PETS
 ${
   terms.petsAllowed
-    ? `Pets are permitted upon this property as follows:
-${
-  (terms.pets || []).length > 0
-    ? (terms.pets || []).map((p) => `- ${p.count} × ${p.type}`).join('\n')
-    : '- Pet types/counts to be approved by Landlord in writing'
-}
-Total approved pets: ${totalPetCount(terms)}
-Pet Deposit: $${(terms.petDeposit || 0).toFixed(2)} (total)
-Pet Rent: $${(terms.petRent || 0).toFixed(2)} per pet per month
-Total Pet Rent: $${totalPetCount(terms) > 0 && terms.petRent ? (terms.petRent * totalPetCount(terms)).toFixed(2) : '0.00'} per month${terms.paymentSchedule === 'prepaid' ? ` ($${totalLeasePetRent(terms).toFixed(2)} for full lease term)` : ''}
-Additional pets require prior written consent from Landlord. Unauthorized pets are a material breach of this Lease.`
+    ? `Pets are permitted upon this property. See the attached Pet Policy Addendum for specific pet details, financial terms, and tenant responsibilities.`
     : 'No pets are permitted on the property without prior written consent from Landlord.'
 }
 
+${property.state === 'NV' && terms.petsAllowed ? `PET POLICY ADDENDUM
+__________________________
+
+A. PERMISSION AND IDENTIFICATION
+Landlord grants Tenant permission to keep the designated pet(s) verified below at the Premises. No other animals, including offspring, are permitted without prior written consent from the Landlord.
+* Pet 1: Type: ${(terms.pets && terms.pets[0] ? terms.pets[0].type : 'N/A')} | Breed: ${(terms.pets && terms.pets[0] ? (terms.pets[0].breed || 'N/A') : 'N/A')} | Count: ${(terms.pets && terms.pets[0] ? terms.pets[0].count : 0)} | Age: ${(terms.pets && terms.pets[0] ? (terms.pets[0].age || 'N/A') : 'N/A')}
+* Pet 2: Type: ${(terms.pets && terms.pets[1] ? terms.pets[1].type : 'N/A')} | Breed: ${(terms.pets && terms.pets[1] ? (terms.pets[1].breed || 'N/A') : 'N/A')} | Count: ${(terms.pets && terms.pets[1] ? terms.pets[1].count : 0)} | Age: ${(terms.pets && terms.pets[1] ? (terms.pets[1].age || 'N/A') : 'N/A')}
+
+B. FINANCIAL TERMS & DISCLOSURES
+In compliance with Nevada's maximum rent disclosure standards, all pet-related financial obligations are strictly itemized below:
+${terms.petRent !== undefined && terms.petRent !== null ? `* Monthly Pet Rent: Tenant agrees to pay an additional $${terms.petRent.toFixed(2)} per month as pet rent. This fee is included in the advertised Maximum Monthly Gross Rent.\n` : ''}
+${terms.petDeposit !== undefined && terms.petDeposit !== null ? `* Refundable Pet Deposit: Tenant shall deposit the sum of $${terms.petDeposit.toFixed(2)} as a pet deposit. This sum is held under NRS 118A.242. The combined total of all deposits (security, key, pet) does not exceed the statutory limit of three (3) months' rent.\n` : ''}
+${terms.nonRefundableFee !== undefined && terms.nonRefundableFee !== null ? `* Non-Refundable Pet Fee: Tenant shall pay a one-time, non-refundable fee of $${terms.nonRefundableFee.toFixed(2)} for professional carpet cleaning and deodorization upon move-out.\n` : ''}
+C. TENANT RESPONSIBILITIES AND RULES
+1) Control and Containment: Pets must be kept on a leash at all times when outside the dwelling unit. Pets are prohibited from roaming common areas unattended.
+2) Sanitation: Tenant is strictly responsible for the immediate disposal of all pet waste. Waste must be placed in designated trash receptacles. 
+3) Damage and Disturbance: Tenant ensures pets will not cause property damage or disturb neighbors (e.g., excessive barking). Tenant accepts full financial liability for repairs or flooring replacement caused by pet damage.
+4) Flooring Protection and Rug Requirements: Tenant acknowledges that the premises features premium hard-surface wood-style flooring. To prevent localized wear, deep scratches, and finish dulling, Tenant agrees to place protective area rugs, runners, or mats over high-traffic pathways and underneath all designated pet resting areas.
+5) Moisture Barriers and Food Stations: Tenant must place a 100% waterproof mat or protective tray underneath all pet food bowls, water dishes, and litter boxes. Disposable training pads or pet beds are strictly prohibited from sitting directly on the bare flooring surfaces if they are damp or lack a solid rubber/plastic backing.
+6) Immediate Spill and Waste Remediation: Standing liquid is the primary cause of floor warping, seam swelling, and permanent staining. Tenant is strictly required to wipe up all pet liquid accidents (including urine, saliva, or vomit) immediately upon discovery. Any liquid left standing that seeps into floorboard seams, baseboards, or subflooring resulting in structural buckle, stain, or odor will be deemed property damage and not normal wear and tear.
+7) Claw and Scratch Prevention: Tenant agrees to keep the pet's claws and nails routinely trimmed short and filed smooth to minimize physical scratching, gouging, or chipping of the floor's protective wear layer.
+8) Safe Cleaning Practices: Tenant agrees to refrain from using harsh abrasive scrubbers, bleach, heavy solvents, or soaking mops on the flooring. Only manufacturer-approved, pH-neutral hard-surface cleaners may be used.
+9) End-of-Tenancy Liability: Upon move-out, Tenant accepts full financial liability for the costs of professional board replacement, deep sanding, or chemical refinishing required to correct pet-inflicted floor damage or neutralize deep-set biological odors.
+
+D. EXCLUSION FOR ASSISTANCE ANIMALS
+In accordance with federal Fair Housing laws and NRS 118.105, verified service animals and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions. However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.
+
+E. VIOLATIONS AND LEASE TERMINATION
+Any breach of this Pet Policy constitutes a material lease violation. Landlord reserves the right to issue a Nevada 5-Day Notice to Cure or Quit. Failure to remedy the violation or remove the unauthorized pet within five (5) judicial days will result in the immediate initiation of formal eviction proceedings.
+
+` : ''}
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '8' : '7'}. UTILITIES AND SERVICES
 Included with Rent (Landlord Paid — No Charge):
 ${terms.utilitiesIncluded.length > 0 ? terms.utilitiesIncluded.map(u => `- ${u}`).join('\n') : 'None'}

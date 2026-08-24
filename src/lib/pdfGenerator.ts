@@ -16,20 +16,44 @@ export const generatePDF = async (lease: LeaseDocument): Promise<Blob> => {
   doc.setFont('helvetica', 'normal');
   
   // Add lease content
-  const lines = doc.splitTextToSize(leaseText, 180);
+  const lines = doc.splitTextToSize(leaseText, 160);
   let yPosition = 35;
-  const lineHeight = 6;
-  const pageHeight = 280;
+  const lineHeight = 5;
+  const pageHeight = 270;
   
   lines.forEach((line: string) => {
     if (yPosition > pageHeight) {
       doc.addPage();
       yPosition = 20;
     }
-    doc.setFont('helvetica', 'normal');
-    doc.text(line, 15, yPosition);
+    // Parse **bold** markers and render word-by-word with justify
+    const segments = line.split('**');
+    let xPos = 18;
+    segments.forEach((segment, idx) => {
+      const isBold = idx % 2 === 1;
+      doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+      const words = segment.split(' ');
+      words.forEach((word, wIdx) => {
+        if (word) {
+          doc.text(word, xPos, yPosition);
+          xPos += doc.getTextWidth(word) + (wIdx < words.length - 1 ? 2 : 0);
+        }
+      });
+      if (idx < segments.length - 1) {
+        xPos += 2;
+      }
+    });
     yPosition += lineHeight;
   });
+  
+  // Footer with page number
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+  }
 
   // Add signature images if they exist
   if ((lease.landlordSignatures && lease.landlordSignatures.length > 0) || (lease.tenantSignatures && lease.tenantSignatures.length > 0)) {
