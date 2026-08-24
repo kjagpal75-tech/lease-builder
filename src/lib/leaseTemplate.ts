@@ -203,9 +203,8 @@ ${terms.checkedUtilities && terms.checkedUtilities.length > 0 ? terms.checkedUti
     'Tahoe Truckee Sierra Disposal (Trash) — Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com',
     'Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com',
   ] : [
-    'NV Energy (Electric) — Phone: (775) 834-4444 | www.nvenergy.com',
+    'NV Energy (Electric & Gas) — Phone: (775) 834-4444 | www.nvenergy.com',
     'Truckee Meadows Water Authority (Water) — Phone: (775) 834-8080 | www.tmwa.com',
-    'NV Energy (Gas) — Phone: (877) 860-6020 | www.swgas.com',
     'Waste Management (Trash) — Phone: (775) 329-8822 | www.wm.com',
     'Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com',
   ];
@@ -215,9 +214,8 @@ ${terms.checkedUtilities && terms.checkedUtilities.length > 0 ? terms.checkedUti
 - Truckee Donner PUD (Water) — Phone: (530) 587-3896 | www.tdpud.org
 - Southwest Gas (Gas) — Phone: (877) 860-6020 | www.swgas.com
 - Tahoe Truckee Sierra Disposal (Trash) — Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com
-- Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com` : `- NV Energy (Electric) — Phone: (775) 834-4444 | www.nvenergy.com
+- Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com` : `- NV Energy (Electric & Gas) — Phone: (775) 834-4444 | www.nvenergy.com
 - Truckee Meadows Water Authority (Water) — Phone: (775) 834-8080 | www.tmwa.com
-- NV Energy (Gas) — Phone: (877) 860-6020 | www.swgas.com
 - Waste Management (Trash) — Phone: (775) 329-8822 | www.wm.com
 - Spectrum / AT&T (Internet) — Spectrum: (833) 267-6094 | AT&T: (800) 288-2020 | www.spectrum.com | www.att.com`)}
 

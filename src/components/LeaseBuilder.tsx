@@ -419,9 +419,9 @@ export default function LeaseBuilder() {
                     ) : (
                       <>
                         <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('NV Energy (Electric)')} onChange={(e) => handleUtilityCheck('NV Energy (Electric)', e.target.checked)} />
+                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('NV Energy (Electric & Gas)')} onChange={(e) => handleUtilityCheck('NV Energy (Electric & Gas)', e.target.checked)} />
                           <div>
-                            <span className="font-medium">NV Energy (Electric)</span>
+                            <span className="font-medium">NV Energy (Electric & Gas)</span>
                             <p className="text-xs text-green-600">Phone: (775) 834-4444 | www.nvenergy.com</p>
                           </div>
                         </li>
@@ -430,13 +430,6 @@ export default function LeaseBuilder() {
                           <div>
                             <span className="font-medium">Truckee Meadows Water Authority (Water)</span>
                             <p className="text-xs text-green-600">Phone: (775) 834-8080 | www.tmwa.com</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('NV Energy (Gas)')} onChange={(e) => handleUtilityCheck('NV Energy (Gas)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">NV Energy (Gas)</span>
-                            <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
                           </div>
                         </li>
                         <li className="flex items-start gap-2">
