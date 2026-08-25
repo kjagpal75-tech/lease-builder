@@ -1,6 +1,6 @@
 import { LeaseDocument } from '@/types/lease';
 import { generateLeaseText } from './leaseTemplate';
-import { formatLocalDate } from './storage';
+import { formatLocalDate, totalMonthlyUtilityReimbursement, totalMonthlyRent } from './storage';
 
 export const generateLeaseHTML = (lease: LeaseDocument): string => {
   // Get the lease text
@@ -111,9 +111,9 @@ export const generateLeaseHTML = (lease: LeaseDocument): string => {
 
 export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   const { landlords, tenants, coSigners, property, terms } = lease;
-  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const start = terms.startDate ? new Date(terms.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
-  const end = terms.endDate ? new Date(terms.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+  const today = formatLocalDate(new Date().toISOString().slice(0, 10));
+  const start = terms.startDate ? formatLocalDate(terms.startDate) : '';
+  const end = terms.endDate ? formatLocalDate(terms.endDate) : '';
 
   // Build landlord info with full details matching preview
   const landlordInfo = landlords.map((l, i) => `
@@ -148,7 +148,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <strong>Permitted Pets:</strong><br>
       &bull; <strong>Pet 1:</strong> Dog | Basset Hound / Beagle Mix | Count: 1 | Age: 6<br>
       &bull; <strong>Pet 2:</strong> Cat | Orange Tabby | Count: 1 | Age: 10<br>
-      <strong>Refundable Pet Deposit:</strong> <strong>$1,000.00</strong> (Held under NRS 118A.242. Total combined deposits do not exceed statutory limit of 3 months' rent).
+      <strong>Refundable Pet Deposit:</strong> <strong>$1,000.00</strong> (Held under NRS 118A.242. Total combined deposits do not exceed statutory limit of 3 months' rent). ($500/pet × 2 pets)
     </div>
     <h3>Tenant Pet Responsibilities & Rules</h3>
     <ol>
@@ -221,7 +221,8 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <ul>
       <li><strong>NRS Chapter 118A Compliance:</strong> Complies fully with Nevada landlord-tenant laws. Free copy of signed lease and inventory/condition record provided.</li>
       <li><strong>Nuisance Provision (NRS 202.470 / 118A.200):</strong> Nuisance/disturbances strictly prohibited (misdemeanor under NV law). Reports can be submitted to Landlord in writing.</li>
-      <li><strong>Emergency Contact & Flag Display:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260). Tenants retain right to display US Flag per NRS 118A.325.</li>
+      <li><strong>Emergency Contact:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260).</li>
+      <li><strong>Flag Display:</strong> Tenants retain right to display US Flag per NRS 118A.325.</li>
       <li><strong>Foreclosure Disclosure (NRS 118A.275):</strong> Landlord discloses property is NOT currently subject to foreclosure proceedings.</li>
     </ul>
   ` : `
@@ -508,7 +509,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <div class="header">
             <h1>Residential Lease Agreement</h1>
-            <div class="subtitle">State of ${property.state} &bull; Effective Date: ${today}</div>
+            <div class="subtitle">State of ${property.state}</div>
         </div>
 
         <table class="grid-2">
@@ -538,7 +539,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <table class="table-summary">
             <tr>
                 <th>Property Address</th>
-                <td>${property.address}</td>
+                <td>${property.address}, ${property.city}, ${property.state} ${property.zipCode}</td>
             </tr>
             <tr>
                 <th>Property Type</th>
@@ -550,23 +551,52 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
             </tr>
         </table>
 
-        <h2>2. Financial Terms: Rent & Security Deposit</h2>
+        <h2>2. Financial Terms</h2>
+        <h3>Rent</h3>
         <table class="table-summary">
             <tr>
                 <th>Monthly Rent</th>
-                <td><strong>$${terms.monthlyRent?.toFixed(2) || '0.00'}</strong> per month, due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.</td>
+                <td><strong>$${totalMonthlyRent(terms).toFixed(2) || '0.00'}</strong> per month, due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.</td>
             </tr>
+            <tr>
+                <th>Base Rent</th>
+                <td><strong>$${terms.monthlyRent?.toFixed(2) || '0.00'}</strong> per month</td>
+            </tr>
+            ${totalMonthlyUtilityReimbursement(terms) > 0 ? `
+            <tr>
+                <th>Utility Reimbursements</th>
+                <td><strong>$${totalMonthlyUtilityReimbursement(terms).toFixed(2)}</strong> per month (added to rent)</td>
+            </tr>
+            ` : ''}
+        </table>
+
+        <h3>Move-In Deposits and Fees</h3>
+        <table class="table-summary">
             <tr>
                 <th>Security Deposit</th>
-                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (Returned within 30 days of move-out per NV law, less legal deductions).</td>
+                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (Returned within 30 days of move-out per ${property.state === 'NV' ? 'NRS law' : 'CA Civil Code'}, less legal deductions).</td>
             </tr>
+            ${terms.petsAllowed && terms.petDeposit ? `
+            <tr>
+                <th>Pet Deposit</th>
+                <td><strong>$${terms.petDeposit?.toFixed(2) || '0.00'}</strong> ${property.state === 'NV' ? '(Held under NRS 118A.242)' : '(Refundable pet deposit)'}.</td>
+            </tr>
+            ` : ''}
+            <tr>
+                <th>Total Move-In Cost</th>
+                <td><strong>$${((terms.securityDeposit || 0) + ((terms.petsAllowed && terms.petDeposit) ? terms.petDeposit : 0)).toFixed(2)}</strong> (Security Deposit${terms.petsAllowed && terms.petDeposit ? ' + Pet Deposit' : ''})</td>
+            </tr>
+        </table>
+
+        <h3>Late Fees & Other Charges</h3>
+        <table class="table-summary">
             <tr>
                 <th>Late Fee</th>
-                <td><strong>5% of periodic rent ($${(terms.monthlyRent ? terms.monthlyRent * 0.05 : 0).toFixed(2)})</strong>, imposed after at least 3 calendar days grace period (NRS 118A.210). Non-compounding.</td>
+                <td><strong>5% of base rent ($${(terms.monthlyRent ? terms.monthlyRent * 0.05 : 0).toFixed(2)})</strong>, imposed after at least ${property.state === 'NV' ? '3' : '5'} calendar days grace period ${property.state === 'NV' ? '(NRS 118A.210)' : '(CA Civil Code § 1671)'}. Non-compounding.</td>
             </tr>
             <tr>
                 <th>Returned Check Fee</th>
-                <td><strong>$${terms.returnedCheckFee?.toFixed(2) || '25.00'}</strong> for any check returned unpaid / dishonored (NRS 118A.200).</td>
+                <td><strong>$${terms.returnedCheckFee?.toFixed(2) || (property.state === 'NV' ? '25.00' : '30.00')}</strong> for any check returned unpaid / dishonored ${property.state === 'NV' ? '(NRS 118A.200)' : '(CA Civil Code § 1719)'}.</td>
             </tr>
         </table>
 
@@ -598,7 +628,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         </table>
 
         <h2>${property.state === 'NV' ? '10' : '9'}. Signatures & Execution</h2>
-        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ${today}.</p>
+        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ________________________.</p>
 
         ${sigTable}
 
@@ -607,7 +637,6 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
             This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California and Nevada under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
             <ul>
                 <li>Signature records include timestamp, IP address, user agent, and signature image audit trails.</li>
-                <li>This document is provided for informational purposes; parties should consult legal counsel for compliance.</li>
             </ul>
         </div>
 

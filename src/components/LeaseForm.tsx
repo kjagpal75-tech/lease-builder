@@ -26,6 +26,8 @@ import {
   totalPetCount,
   totalMonthlyPetRent,
   totalLeasePetRent,
+  totalMonthlyRent,
+  totalMonthlyUtilityReimbursement,
 } from '@/lib/storage';
 import OwnedPropertiesManager from './OwnedPropertiesManager';
 import { landlordProfilesService } from '@/lib/landlordProfiles';
@@ -1576,6 +1578,23 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
           </div>
         </div>
       </section>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+        <h3 className="text-sm font-semibold text-blue-900 mb-2">Monthly Rent Summary</h3>
+        <div className="space-y-1 text-sm">
+          <p className="text-blue-800">
+            <strong>Base Rent:</strong> ${terms.monthlyRent.toFixed(2)}
+          </p>
+          {totalMonthlyUtilityReimbursement(terms) > 0 && (
+            <p className="text-blue-800">
+              <strong>Utility Reimbursements:</strong> ${totalMonthlyUtilityReimbursement(terms).toFixed(2)}
+            </p>
+          )}
+          <p className="text-blue-900 font-bold text-base border-t border-blue-200 pt-1 mt-1">
+            <strong>Total Monthly Rent:</strong> ${totalMonthlyRent(terms).toFixed(2)}
+          </p>
+        </div>
+      </div>
 
       <div className="flex gap-4">
         <button

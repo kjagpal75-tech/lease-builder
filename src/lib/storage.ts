@@ -104,7 +104,19 @@ export function applyStateFeeDefaults(
   };
 }
 
+/** Calculate total monthly utility reimbursement amount */
+export function totalMonthlyUtilityReimbursement(terms: LeaseTerms): number {
+  const amounts = terms.utilityReimbursementAmounts || {};
+  return Object.values(amounts).reduce((sum, amount) => sum + (amount || 0), 0);
+}
+
+/** Calculate total monthly rent including utility reimbursements */
+export function totalMonthlyRent(terms: LeaseTerms): number {
+  return terms.monthlyRent + totalMonthlyUtilityReimbursement(terms);
+}
+
 export function formatRentSummary(terms: LeaseTerms): string {
+  const utilityReimbursement = totalMonthlyUtilityReimbursement(terms);
   if (terms.paymentSchedule === 'prepaid') {
     const total = terms.totalRent ?? 0;
     const petRentTotal = totalLeasePetRent(terms);
@@ -113,6 +125,11 @@ export function formatRentSummary(terms: LeaseTerms): string {
       return `$${total.toFixed(2)} prepaid (base: $${baseRent.toFixed(2)} + pet rent: $${petRentTotal.toFixed(2)})`;
     }
     return `$${total.toFixed(2)} prepaid`;
+  }
+  const baseRent = terms.monthlyRent;
+  const totalRent = baseRent + utilityReimbursement;
+  if (utilityReimbursement > 0) {
+    return `$${totalRent.toFixed(2)}/month (base rent: $${baseRent.toFixed(2)} + utility reimbursements: $${utilityReimbursement.toFixed(2)})`;
   }
   return `$${terms.monthlyRent.toFixed(2)}/month`;
 }
