@@ -152,7 +152,7 @@ ${
 ${property.state === 'NV' && terms.petsAllowed ? `PET POLICY ADDENDUM
 __________________________
 
-A. PERMISSION AND IDENTIFICATION
+PERMISSION AND IDENTIFICATION
 Landlord grants Tenant permission to keep the designated pet(s) verified below at the Premises. No other animals, including offspring, are permitted without prior written consent from the Landlord.
 * Pet 1: Type: ${(terms.pets && terms.pets[0] ? terms.pets[0].type : 'N/A')} | Breed: ${(terms.pets && terms.pets[0] ? (terms.pets[0].breed || 'N/A') : 'N/A')} | Count: ${(terms.pets && terms.pets[0] ? terms.pets[0].count : 0)} | Age: ${(terms.pets && terms.pets[0] ? (terms.pets[0].age || 'N/A') : 'N/A')}
 * Pet 2: Type: ${(terms.pets && terms.pets[1] ? terms.pets[1].type : 'N/A')} | Breed: ${(terms.pets && terms.pets[1] ? (terms.pets[1].breed || 'N/A') : 'N/A')} | Count: ${(terms.pets && terms.pets[1] ? terms.pets[1].count : 0)} | Age: ${(terms.pets && terms.pets[1] ? (terms.pets[1].age || 'N/A') : 'N/A')}
@@ -162,17 +162,6 @@ In compliance with Nevada's maximum rent disclosure standards, all pet-related f
 ${terms.petRent !== undefined && terms.petRent !== null ? `* Monthly Pet Rent: Tenant agrees to pay an additional $${terms.petRent.toFixed(2)} per month as pet rent. This fee is included in the advertised Maximum Monthly Gross Rent.\n` : ''}
 ${terms.petDeposit !== undefined && terms.petDeposit !== null ? `* Refundable Pet Deposit: Tenant shall deposit the sum of $${terms.petDeposit.toFixed(2)} as a pet deposit. This sum is held under NRS 118A.242. The combined total of all deposits (security, key, pet) does not exceed the statutory limit of three (3) months' rent.\n` : ''}
 ${terms.nonRefundableFee !== undefined && terms.nonRefundableFee !== null ? `* Non-Refundable Pet Fee: Tenant shall pay a one-time, non-refundable fee of $${terms.nonRefundableFee.toFixed(2)} for professional carpet cleaning and deodorization upon move-out.\n` : ''}
-C. TENANT RESPONSIBILITIES AND RULES
-1) Control and Containment: Pets must be kept on a leash at all times when outside the dwelling unit. Pets are prohibited from roaming common areas unattended.
-2) Sanitation: Tenant is strictly responsible for the immediate disposal of all pet waste. Waste must be placed in designated trash receptacles. 
-3) Damage and Disturbance: Tenant ensures pets will not cause property damage or disturb neighbors (e.g., excessive barking). Tenant accepts full financial liability for repairs or flooring replacement caused by pet damage.
-4) Flooring Protection and Rug Requirements: Tenant acknowledges that the premises features premium hard-surface wood-style flooring. To prevent localized wear, deep scratches, and finish dulling, Tenant agrees to place protective area rugs, runners, or mats over high-traffic pathways and underneath all designated pet resting areas.
-5) Moisture Barriers and Food Stations: Tenant must place a 100% waterproof mat or protective tray underneath all pet food bowls, water dishes, and litter boxes. Disposable training pads or pet beds are strictly prohibited from sitting directly on the bare flooring surfaces if they are damp or lack a solid rubber/plastic backing.
-6) Immediate Spill and Waste Remediation: Standing liquid is the primary cause of floor warping, seam swelling, and permanent staining. Tenant is strictly required to wipe up all pet liquid accidents (including urine, saliva, or vomit) immediately upon discovery. Any liquid left standing that seeps into floorboard seams, baseboards, or subflooring resulting in structural buckle, stain, or odor will be deemed property damage and not normal wear and tear.
-7) Claw and Scratch Prevention: Tenant agrees to keep the pet's claws and nails routinely trimmed short and filed smooth to minimize physical scratching, gouging, or chipping of the floor's protective wear layer.
-8) Safe Cleaning Practices: Tenant agrees to refrain from using harsh abrasive scrubbers, bleach, heavy solvents, or soaking mops on the flooring. Only manufacturer-approved, pH-neutral hard-surface cleaners may be used.
-9) End-of-Tenancy Liability: Upon move-out, Tenant accepts full financial liability for the costs of professional board replacement, deep sanding, or chemical refinishing required to correct pet-inflicted floor damage or neutralize deep-set biological odors.
-
 D. EXCLUSION FOR ASSISTANCE ANIMALS
 In accordance with federal Fair Housing laws and NRS 118.105, verified service animals and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions. However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.
 
@@ -203,17 +192,57 @@ Tenant shall maintain the premises in clean and sanitary condition and shall sur
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '11' : '10'}. LANDLORD ENTRY
 Landlord may enter the premises at reasonable times with 24-hour notice for inspection, maintenance, or to show the property to prospective tenants or buyers. In case of emergency, Landlord may enter without notice.
 
-${terms.holdingDeposit && terms.holdingDeposit > 0 ? '12' : '11'}. DEFAULT
-If Tenant fails to pay rent when due or violates any term of this Lease, Landlord may pursue all legal remedies available under ${property.state === 'CA' ? 'California' : 'Nevada'} law.
+${terms.holdingDeposit && terms.holdingDeposit > 0 ? '12' : '11'}. ${property.state === 'NV' ? 'DEFAULT AND REMEDIES' : 'DEFAULT'}
+${property.state === 'NV' ? `
+A. Event of Default: Tenant shall be deemed in material default of this Lease Agreement if:
+   1) Tenant fails to pay Rent, utility reimbursements, or any other financial obligation within the timelines specified herein; or
+   2) Tenant, authorized occupants, or guests violate any material covenant, condition, or rule of this Lease Agreement, including the attached Pet Policy Addendum.
 
-${terms.holdingDeposit && terms.holdingDeposit > 0 ? '13' : '12'}. GOVERNING LAW
-This Lease shall be governed by and construed in accordance with the laws of the State of ${property.state === 'CA' ? 'California' : 'Nevada'}.
+B. Landlord’s Remedies: Upon the occurrence of an Event of Default, Landlord may pursue all legal and equitable remedies available to recover physical possession of the premises and documented actual damages. In accordance with Nevada summary eviction proceedings, Landlord’s remedies are governed by the following strict statutory notice tracks:
+   1) Non-Payment of Rent: Landlord shall serve a written 7-Day Notice to Pay or Quit pursuant to NRS 40.2512.
+   2) Curable Lease Violations: For non-monetary breaches, Landlord shall serve a written 5-Day Notice to Perform Lease Condition or Quit pursuant to NRS 40.2516.
+   3) Non-Curable Violations: For severe structural property waste, illegal activity, or recurring nuisances, Landlord shall serve a written 3-Day Notice to Quit pursuant to NRS 40.2514.
+
+C. Attorney's Fees: In compliance with NRS 118A.220(1)(c), if either party brings a formal legal action to enforce or interpret the terms of this Lease Agreement, the court may award reasonable attorney's fees and actual litigation costs strictly to the prevailing party.
+` : `If Tenant fails to pay rent when due or violates any term of this Lease, Landlord may pursue all legal remedies available under ${property.state === 'CA' ? 'California' : 'Nevada'} law.`}
+
+${terms.holdingDeposit && terms.holdingDeposit > 0 ? '13' : '12'}. ${property.state === 'NV' ? 'GOVERNING LAW AND SEVERABILITY' : 'GOVERNING LAW'}
+${property.state === 'NV' ? `
+A. Choice of Law: This Lease Agreement, along with all incorporated addendums, disclosures, and subsequent modifications, shall be governed by, construed, and enforced strictly in accordance with the laws of the State of Nevada.
+
+B. Venue Selection: Any judicial or summary eviction dispute arising directly under this lease framework shall be subject to the exclusive jurisdiction of the Justice Court in the specific county where the rental property is physically located.
+
+C. Severability: If any clause, provision, or statutory reference within this Lease is found to be void, illegal, or legally unenforceable under Nevada law (including NRS Chapter 118A), such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remainder of the Lease shall remain in full force and effect.
+` : `This Lease shall be governed by and construed in accordance with the laws of the State of ${property.state === 'CA' ? 'California' : 'Nevada'}.`}
 
 ${stateClauses.join('\n')}
 
 ${disclosuresSection}
 
-ADDENDUM — UTILITY COMPANY CHECKLIST
+ADDENDUM A — TENANT RESPONSIBILITIES AND RULES (PET-RELATED)
+__________________________
+
+This Addendum forms part of the Residential Lease Agreement between Landlord and Tenant. By signing the Lease, Tenant acknowledges and agrees to the following pet-related responsibilities and rules:
+
+C. TENANT RESPONSIBILITIES AND RULES
+1) Control and Containment: Pets must be kept on a leash at all times when outside the dwelling unit. Pets are prohibited from roaming common areas unattended.
+2) Sanitation: Tenant is strictly responsible for the immediate disposal of all pet waste. Waste must be placed in designated trash receptacles.
+3) Damage and Disturbance: Tenant ensures pets will not cause property damage or disturb neighbors (e.g., excessive barking). Tenant accepts full financial liability for repairs or flooring replacement caused by pet damage.
+4) Flooring Protection and Rug Requirements: Tenant acknowledges that the premises features premium hard-surface wood-style flooring. To prevent localized wear, deep scratches, and finish dulling, Tenant agrees to place protective area rugs, runners, or mats over high-traffic pathways and underneath all designated pet resting areas.
+5) Moisture Barriers and Food Stations: Tenant must place a 100% waterproof mat or protective tray underneath all pet food bowls, water dishes, and litter boxes. Disposable training pads or pet beds are strictly prohibited from sitting directly on the bare flooring surfaces if they are damp or lack a solid rubber/plastic backing.
+6) Immediate Spill and Waste Remediation: Standing liquid is the primary cause of floor warping, seam swelling, and permanent staining. Tenant is strictly required to wipe up all pet liquid accidents (including urine, saliva, or vomit) immediately upon discovery. Any liquid left standing that seeps into floorboard seams, baseboards, or subflooring resulting in structural buckle, stain, or odor will be deemed property damage and not normal wear and tear.
+7) Claw and Scratch Prevention: Tenant agrees to keep the pet's claws and nails routinely trimmed short and filed smooth to minimize physical scratching, gouging, or chipping of the floor's protective wear layer.
+8) Safe Cleaning Practices: Tenant agrees to refrain from using harsh abrasive scrubbers, bleach, heavy solvents, or soaking mops on the flooring. Only manufacturer-approved, pH-neutral hard-surface cleaners may be used.
+9) End-of-Tenancy Liability: Upon move-out, Tenant accepts full financial liability for the costs of professional board replacement, deep sanding, or chemical refinishing required to correct pet-inflicted floor damage or neutralize deep-set biological odors.
+
+__________________________
+LANDLORD SIGNATURE: __________________________
+Date: __________________________
+
+TENANT SIGNATURE: __________________________
+Date: __________________________
+
+ADDENDUM B — UTILITY COMPANY CHECKLIST
 The following utility companies apply to the property (${property.city === 'Truckee' ? 'Truckee, CA' : 'Reno, NV'}). Tenant and Landlord should verify contact information and set up accounts before move-in.
 
 ${terms.checkedUtilities && terms.checkedUtilities.length > 0 ? terms.checkedUtilities.map(u => {

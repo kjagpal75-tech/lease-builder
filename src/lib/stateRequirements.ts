@@ -615,34 +615,34 @@ export const getStateSpecificClauses = (state: State): string[] => {
   switch (state) {
     case 'NV':
       return [
-        'NEVADA SPECIFIC PROVISIONS',
+        '<u>NEVADA SPECIFIC PROVISIONS</u>',
         '',
-        '1. LANDLORD AND TENANT OBLIGATIONS (NRS 118A.200)',
+        'A. LANDLORD AND TENANT OBLIGATIONS (NRS 118A.200)',
         '   Both parties acknowledge that this lease agreement complies with Nevada Revised Statutes Chapter 118A.',
         '',
-        '2. NUISANCE PROVISION (NRS 202.470)',
+        'B. NUISANCE PROVISION (NRS 202.470)',
         '   Tenant agrees not to engage in any activity that constitutes a nuisance under Nevada law. A nuisance includes any activity that disturbs the peace, comfort, or repose of others. Violations may result in criminal penalties.',
         '',
-        '3. EMERGENCY CONTACT INFORMATION',
+        'C. EMERGENCY CONTACT INFORMATION',
         '   Landlord shall provide emergency contact information within the county or within 60 miles of the property.',
         '',
-        '4. PROPERTY CONDITION RECORD',
+        'D. PROPERTY CONDITION RECORD',
         '   A separate inventory and condition record has been signed by both parties and is attached to this lease.',
         '',
-        '5. U.S. FLAG DISPLAY',
+        'E. U.S. FLAG DISPLAY',
         '   Tenant has the right to display the United States flag on the rental property in accordance with Nevada law.',
       ];
     case 'CA':
       return [
-        'CALIFORNIA SPECIFIC PROVISIONS',
+        '<u>CALIFORNIA SPECIFIC PROVISIONS</u>',
         '',
-        '1. CALIFORNIA CIVIL CODE COMPLIANCE',
+        '<u>1. CALIFORNIA CIVIL CODE COMPLIANCE</u>',
         '   This lease agreement complies with all applicable California Civil Code provisions including but not limited to Sections 1940-1954.6.',
         '',
-        '2. SECURITY DEPOSIT LIMITATION (AB 12)',
+        '<u>2. SECURITY DEPOSIT LIMITATION (AB 12)</u>',
         '   The security deposit is limited to one month\'s rent as required by California law for unfurnished residential properties, subject to statutory exceptions.',
         '',
-        '3. DISASTER AND EMERGENCY PROCEDURES (SB 610)',
+        '<u>3. DISASTER AND EMERGENCY PROCEDURES (SB 610)</u>',
         '   In the event of a disaster, landlord shall provide detailed information about repairs and remediation within a reasonable time.',
       ];
     default:

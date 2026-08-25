@@ -1,0 +1,463 @@
+blob:http://localhost:9000/816e4d80-754b-4925-9f9e-d2885c57b61c<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Residential Lease Agreement</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Reset body and set gray background for browser preview */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #2d3748;
+            line-height: 1.45;
+            font-size: 9.5pt;
+            margin: 0;
+            padding: 20px 0;
+            background-color: #e2e8f0; /* Darker background so the document stands out */
+        }
+
+        /* Document Container (Creates visual margins in Chrome viewport) */
+        .page-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px 25px; /* Creates inner page margins */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Gives paper effect in browser */
+        }
+
+        /* Print Override so PDF/Print mode stays clean */
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+            }
+            .page-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            @page {
+                size: A4;
+                margin: 18mm 15mm;
+            }
+        }
+
+        /* Top Header Banner */
+        .header {
+            background-color: #1a365d;
+            color: #ffffff;
+            margin: -20px -25px 20px -25px; /* Bleeds header to edge of page container */
+            padding: 22px 25px;
+            border-bottom: 4px solid #2b6cb0;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18pt;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .header .subtitle {
+            margin-top: 5px;
+            font-size: 9.5pt;
+            color: #cbd5e0;
+            letter-spacing: 0.3px;
+        }
+
+        /* Section Headings */
+        h2 {
+            color: #1a365d;
+            font-size: 11pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: #2b6cb0;
+            font-size: 10pt;
+            font-weight: 700;
+            margin-top: 12px;
+            margin-bottom: 6px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+        /* Two-Column Grid */
+        .grid-2 {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .grid-2 td {
+            vertical-align: top;
+            width: 50%;
+            padding: 0 6px;
+        }
+
+        .grid-2 td:first-child {
+            padding-left: 0;
+        }
+
+        .grid-2 td:last-child {
+            padding-right: 0;
+        }
+
+        /* Card & Highlight Boxes */
+        .card {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            color: #2c5282;
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 3px;
+        }
+
+        .info-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .info-list li {
+            margin-bottom: 3px;
+            font-size: 9pt;
+        }
+
+        .info-list strong {
+            color: #4a5568;
+        }
+
+        .highlight-box {
+            background-color: #ebf8ff;
+            border-left: 3px solid #3182ce;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 9pt;
+        }
+
+        /* Data Tables */
+        .table-summary {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .table-summary th, .table-summary td {
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 9pt;
+        }
+
+        .table-summary th {
+            background-color: #edf2f7;
+            color: #2d3748;
+            font-weight: bold;
+            width: 35%;
+        }
+
+        .table-summary td {
+            background-color: #ffffff;
+        }
+
+        ol, ul {
+            margin-top: 4px;
+            margin-bottom: 10px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        /* Signature Grid */
+        .sig-container {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            page-break-inside: avoid;
+        }
+
+        .sig-block {
+            width: 48%;
+            vertical-align: top;
+            padding: 8px 0;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #4a5568;
+            margin-top: 30px;
+            margin-bottom: 4px;
+            width: 90%;
+        }
+
+        .sig-label {
+            font-size: 8.5pt;
+            color: #4a5568;
+            font-weight: bold;
+        }
+
+        .legal-notice {
+            background-color: #f7fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 10px 12px;
+            font-size: 8pt;
+            color: #4a5568;
+            margin-top: 15px;
+            page-break-inside: avoid;
+        }
+
+        .legal-notice h4 {
+            margin: 0 0 4px 0;
+            color: #2d3748;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+        }
+
+        .legal-notice ul {
+            margin: 4px 0;
+            padding-left: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+
+        <div class="header">
+            <h1>Residential Lease Agreement</h1>
+            <div class="subtitle">State of Nevada &bull; Effective Date: August 24, 2026</div>
+        </div>
+
+        <table class="grid-2">
+            <tr>
+                <td>
+                    <div class="card">
+                        <div class="card-title">Landlords</div>
+                        <ul class="info-list">
+                            <li><strong>1. Kuljit Jagpal</strong></li>
+                            <li>38695 Dow Ct, Fremont CA 94536</li>
+                            <li>Phone: (510) 401-7000 | Email: kjagpal@sbcglobal.net</li>
+                            <li style="margin-top:6px;"><strong>2. Harminder Jagpal</strong></li>
+                            <li>38695 Dow Ct, Fremont CA 94536</li>
+                            <li>Phone: (510) 331-8300 | Email: hkjagpal@hotmail.com</li>
+                        </ul>
+                    </div>
+                </td>
+                <td>
+                    <div class="card">
+                        <div class="card-title">Tenants</div>
+                        <ul class="info-list">
+                            <li><strong>1. Sydney Bell Mora-Miller</strong> ((661) 380-8788)</li>
+                            <li><strong>2. Israel Jaimes</strong> ((661) 404-8058)</li>
+                            <li><strong>3. Elsie Rain Mora</strong> ((661) 800-9022)</li>
+                            <li><strong>4. Ulises Gaspar</strong> ((661) 602-9745)</li>
+                            <li><strong>5. Edwin Antonio Leal Lopez</strong> ((661) 330-3173)</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="card">
+            <div class="card-title">Co-Signer / Guarantor</div>
+            <ul class="info-list">
+                <li><strong>Zachary Cord Pike</strong> &bull; 128 W Alamar Ave #4, Santa Barbara, CA 93105 &bull; Phone: (805) 252-0766 &bull; Email: Zcpike@gmail.com</li>
+            </ul>
+            <div style="font-size: 8.5pt; color: #4a5568; margin-top: 6px; text-align: justify;">
+                <strong>Co-Signer Guarantee & Responsibilities (Nevada Revised Statutes):</strong> The co-signer unconditionally guarantees the full and timely performance of all tenant obligations under this Lease, including rent, fees, and damages. Held jointly and severally liable; liability extends to full term and renewals unless released in writing. Landlord may pursue remedies directly against co-signer without first exhausting tenant remedies.
+            </div>
+        </div>
+
+        <h2>1. Property Description & Lease Term</h2>
+        <table class="table-summary">
+            <tr>
+                <th>Property Address</th>
+                <td>3643 Ruidoso St, Reno, NV 89512</td>
+            </tr>
+            <tr>
+                <th>Property Type</th>
+                <td>Single Family House</td>
+            </tr>
+            <tr>
+                <th>Lease Term</th>
+                <td><strong>September 1, 2026</strong> to <strong>August 31, 2027</strong></td>
+            </tr>
+        </table>
+
+        <h2>2. Financial Terms: Rent & Security Deposit</h2>
+        <table class="table-summary">
+            <tr>
+                <th>Monthly Rent</th>
+                <td><strong>$2,800.00</strong> per month, due on the 1st day of each month.</td>
+            </tr>
+            <tr>
+                <th>Security Deposit</th>
+                <td><strong>$2,800.00</strong> (Returned within 30 days of move-out per NV law, less legal deductions).</td>
+            </tr>
+            <tr>
+                <th>Late Fee</th>
+                <td><strong>5% of periodic rent ($140.00)</strong>, imposed after at least 3 calendar days grace period (NRS 118A.210). Non-compounding.</td>
+            </tr>
+            <tr>
+                <th>Returned Check Fee</th>
+                <td><strong>$25.00</strong> for any check returned unpaid / dishonored (NRS 118A.200).</td>
+            </tr>
+        </table>
+
+        <h2>3. Occupants & Utilities</h2>
+        <p><strong>Authorized Occupants:</strong> Sydney Bell Mora-Miller, Israel Jaimes, Elsie Rain Mora, Ulises Gaspar, Edwin Antonio Leal Lopez.</p>
+        
+        <table class="table-summary">
+            <tr>
+                <th>Tenant Direct Responsibility</th>
+                <td>Water, Garbage, Electricity, Gas, Internet, Cable TV</td>
+            </tr>
+            <tr>
+                <th>Landlord Paid & Tenant Reimbursed</th>
+                <td><strong>Sewer ($61.00/month)</strong> — Added to monthly rent; remains in Landlord's account.</td>
+            </tr>
+            <tr>
+                <th>Included in Rent (No Charge)</th>
+                <td>None</td>
+            </tr>
+        </table>
+
+        <h2>4. Pet Policy Addendum</h2>
+        <div class="highlight-box">
+            <strong>Permitted Pets:</strong><br>
+            &bull; <strong>Pet 1:</strong> Dog | Basset Hound / Beagle Mix | Count: 1 | Age: 6<br>
+            &bull; <strong>Pet 2:</strong> Cat | Orange Tabby | Count: 1 | Age: 10<br>
+            <strong>Refundable Pet Deposit:</strong> <strong>$1,000.00</strong> (Held under NRS 118A.242. Total combined deposits do not exceed statutory limit of 3 months' rent).
+        </div>
+
+        <h3>Tenant Pet Responsibilities & Rules</h3>
+        <ol>
+            <li><strong>Control & Sanitation:</strong> Must be leashed outdoors. Immediate waste disposal in trash receptacles required.</li>
+            <li><strong>Flooring Protection:</strong> Premises features premium hard-surface wood-style flooring. Protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats required under food/water bowls and litter boxes.</li>
+            <li><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid causing floor warping/seam swelling constitutes damage beyond normal wear and tear.</li>
+            <li><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only pH-neutral hard-surface floor cleaners permitted (no harsh solvents/bleach).</li>
+            <li><strong>Assistance Animals:</strong> Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.</li>
+            <li><strong>Violations:</strong> Breach of pet policy allows issuance of Nevada 5-Day Notice to Cure or Quit, leading to formal eviction proceedings if uncured.</li>
+        </ol>
+
+        <h2>5. Lease Terms & Conditions</h2>
+        <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
+        <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
+        <p><strong>Default & Governing Law:</strong> Default allows landlord full legal remedies under Nevada law. Governed by State of Nevada statutes.</p>
+
+        <h2>6. Nevada Specific Provisions & Required Disclosures</h2>
+        <ul>
+            <li><strong>NRS Chapter 118A Compliance:</strong> Complies fully with Nevada landlord-tenant laws. Free copy of signed lease and inventory/condition record provided.</li>
+            <li><strong>Nuisance Provision (NRS 202.470 / 118A.200):</strong> Nuisance/disturbances strictly prohibited (misdemeanor under NV law). Reports can be submitted to Landlord in writing.</li>
+            <li><strong>Emergency Contact & Flag Display:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260). Tenants retain right to display US Flag per NRS 118A.325.</li>
+            <li><strong>Foreclosure Disclosure (NRS 118A.275):</strong> Landlord discloses property is NOT currently subject to foreclosure proceedings.</li>
+        </ul>
+
+        <h2>7. Utility Company Reference Addendum (Reno, NV)</h2>
+        <table class="table-summary">
+            <tr>
+                <th>NV Energy (Electric & Gas)</th>
+                <td>(775) 834-4444 &bull; www.nvenergy.com</td>
+            </tr>
+            <tr>
+                <th>Truckee Meadows Water Authority</th>
+                <td>(775) 834-8080 &bull; www.tmwa.com</td>
+            </tr>
+            <tr>
+                <th>Waste Management (Trash)</th>
+                <td>(775) 329-8822 &bull; www.wm.com</td>
+            </tr>
+            <tr>
+                <th>Spectrum / AT&T (Internet)</th>
+                <td>Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</td>
+            </tr>
+        </table>
+
+        <h2>8. Signatures & Execution</h2>
+        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of August 24, 2026.</p>
+
+        <table class="sig-container">
+            <tr>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">LANDLORD 1: Kuljit Jagpal</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">LANDLORD 2: Harminder Jagpal</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">TENANT 1: Sydney Bell Mora-Miller</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">TENANT 2: Israel Jaimes</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">TENANT 3: Elsie Rain Mora</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">TENANT 4: Ulises Gaspar</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">TENANT 5: Edwin Antonio Leal Lopez</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+                <td class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">CO-SIGNER: Zachary Cord Pike</div>
+                    <div style="font-size: 8pt; color: #718096;">Date: ________________________</div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="legal-notice">
+            <h4>Legal & Digital Signature Notice</h4>
+            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California and Nevada under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
+            <ul>

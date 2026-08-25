@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { LeaseDocument, Signature, defaultDisclosureFlags } from '@/types/lease';
 import { storageService, formatRentSummary, formatLocalDate } from '@/lib/storage';
 import { downloadPDF, previewPDF } from '@/lib/pdfGenerator';
+import { generateProfessionalLeaseHTML } from '@/lib/html2pdfGenerator';
 import { getApplicableDisclosures } from '@/lib/stateRequirements';
 import LeaseForm from './LeaseForm';
 import SignatureCanvasComponent from './SignatureCanvas';
@@ -333,6 +334,24 @@ export default function LeaseBuilder() {
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Preview PDF
+                </button>
+                <button
+                  onClick={async () => {
+                    if (currentLease) {
+                      try {
+                        const htmlContent = generateProfessionalLeaseHTML(currentLease);
+                        const blob = new Blob([htmlContent], { type: 'text/html' });
+                        const url = URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                      } catch (error) {
+                        console.error('Error generating HTML preview:', error);
+                        alert('Error generating HTML preview. Please try again.');
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                >
+                  Preview HTML
                 </button>
               </div>
 

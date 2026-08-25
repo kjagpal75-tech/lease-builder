@@ -1,0 +1,10 @@
+- [x] Analyze current HTML2PDF implementation and compare with preview HTML design
+- [x] Identify discrepancies between current HTML generation and preview template
+- [x] Examine CSS classes and structure in lease-preview.html
+- [x] Review how html2pdf.js is currently being used
+- [x] Determine what changes are needed to align generated HTML with preview format
+- [x] Update generateProfessionalLeaseHTML function to use proper CSS classes from preview
+- [x] Ensure signature blocks and formatting match preview design
+- [x] Test PDF generation with updated HTML structure
+- [x] Verify PDF output matches visual design of preview
+- [x] Make any additional adjustments to ensure consistency
