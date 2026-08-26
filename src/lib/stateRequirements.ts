@@ -90,7 +90,7 @@ export const getStateRequirements = (state: State): StateRequirements => {
       return {
         requiredDisclosures: [
           'Authorized Manager Information (CA Civil Code 1962)',
-          'Megan\'s Law / Sex Offender Registry Notice (Civil Code 2079.10a)',
+          "Megan's Law / Sex Offender Registry Notice (Civil Code 2079.10a)",
           'Bed Bug Disclosure (Civil Code 1954.603)',
           'Smoking Policy (Civil Code 1947.5)',
           'Lead-Based Paint for pre-1978 housing (Federal Title X)',
@@ -650,19 +650,21 @@ export const getStateSpecificClauses = (state: State): string[] => {
   }
 };
 
+/**
+ * Formats disclosures for lease generation as HTML cards matching the application layout.
+ * Each disclosure becomes a card with title and text content.
+ */
 export const formatDisclosuresForLease = (property: Property): string => {
   const disclosures = getApplicableDisclosures(property);
   if (disclosures.length === 0) return '';
 
-  const blocks = disclosures.map((d, index) => {
-    const header = `D${index + 1}. ${d.title}${d.statute ? ` (${d.statute})` : ''}`;
-    return `${header}\n${d.leaseText}`;
-  });
-
-  return [
-    'REQUIRED AND APPLICABLE DISCLOSURES',
-    `The following disclosures apply to this ${property.state === 'CA' ? 'California' : 'Nevada'} ${property.type} located in ${property.city || '[city]'}, ${property.state}.`,
-    '',
-    ...blocks,
-  ].join('\n\n');
+  return `
+        <h2>6. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
+        <p><strong>State of ${property.state} &bull; ${property.type} located in ${property.city || '[city]'}, ${property.state}.</strong></p>
+        <ol>
+        ${disclosures.map((d) => {
+          const title = `${d.title}${d.statute ? ` (${d.statute})` : ''}`;
+          return `<li><strong>${title}</strong><br>${d.leaseText}</li>`;
+        }).join('')}
+        </ol>`;
 };

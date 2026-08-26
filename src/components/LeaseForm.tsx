@@ -1283,29 +1283,6 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
                         />
                       </div>
-                      <div className="w-24">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Count</label>
-                        <input
-                          type="number"
-                          required
-                          min={1}
-                          step={1}
-                          value={pet.count}
-                          onChange={(e) => {
-                            const pets = [...(terms.pets || [])];
-                            pets[index] = {
-                              ...pets[index],
-                              count: Math.max(1, parseInt(e.target.value, 10) || 1),
-                            };
-                            handleTermsChange('pets', pets as LeasePet[]);
-                            if (terms.paymentSchedule === 'prepaid') {
-                              const newPetRentTotal = totalLeasePetRent({ ...terms, pets });
-                              handleTermsChange('totalRent', baseRent + newPetRentTotal);
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
-                        />
-                      </div>
                       <div className="w-32">
                         <label className="block text-xs font-medium text-gray-600 mb-1">Breed</label>
                         <input

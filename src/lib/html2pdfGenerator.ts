@@ -1,6 +1,8 @@
 import { LeaseDocument } from '@/types/lease';
 import { generateLeaseText } from './leaseTemplate';
-import { formatLocalDate, totalMonthlyUtilityReimbursement, totalMonthlyRent } from './storage';
+import { formatLocalDate } from './storage';
+import { getApplicableDisclosures, formatDisclosuresForLease } from './stateRequirements';
+import { defaultDisclosureFlags } from '@/types/lease';
 
 export const generateLeaseHTML = (lease: LeaseDocument): string => {
   // Get the lease text
@@ -115,6 +117,16 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   const start = terms.startDate ? formatLocalDate(terms.startDate) : '';
   const end = terms.endDate ? formatLocalDate(terms.endDate) : '';
 
+  // Generate disclosures section
+  const normalizedPropertyForDisclosures = {
+    ...property,
+    disclosureFlags: {
+      ...defaultDisclosureFlags(),
+      ...(property.disclosureFlags || {}),
+    },
+  };
+  const disclosuresSection = formatDisclosuresForLease(normalizedPropertyForDisclosures);
+
   // Build landlord info with full details matching preview
   const landlordInfo = landlords.map((l, i) => `
     <li><strong>${i + 1}. ${l.name}</strong></li>
@@ -143,12 +155,17 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
   // Pet block matching preview exactly
   const petBlock = terms.petsAllowed ? `
-    <h2>${property.state === 'NV' ? '8' : '7'}. Pet Policy Addendum</h2>
+    <h2>4. Pet Policy Addendum</h2>
     <div class="highlight-box">
       <strong>Permitted Pets:</strong><br>
-      &bull; <strong>Pet 1:</strong> Dog | Basset Hound / Beagle Mix | Count: 1 | Age: 6<br>
-      &bull; <strong>Pet 2:</strong> Cat | Orange Tabby | Count: 1 | Age: 10<br>
-      <strong>Refundable Pet Deposit:</strong> <strong>$1,000.00</strong> (Held under NRS 118A.242. Total combined deposits do not exceed statutory limit of 3 months' rent). ($500/pet × 2 pets)
+      ${(terms.pets || []).map((pet, i) => `
+      &bull; <strong>Pet ${i + 1}:</strong> ${pet.type || 'N/A'} | ${pet.breed || 'N/A'} | Age: ${pet.age || 'N/A'}
+      `).join('')}
+      ${(terms.pets || []).length === 0 ? '<br>&bull; No pets specified' : ''}
+      ${(terms.pets || []).length < 2 && (terms.pets || []).length === 0 ? '<br>&bull; Pet 2: Type: N/A | Breed: N/A | Age: N/A' : ''}
+
+      ${terms.petDeposit ? `<br><strong>Refundable Pet Deposit:</strong> <strong>$${terms.petDeposit.toFixed(2)}</strong> (Held under ${property.state === 'NV' ? 'NRS 118A.242. The combined total of all deposits (security, key, pet) does not exceed the statutory limit of three (3) months\' rent.' : 'California Civil Code § 1950.5. The combined total of all deposits (security, key, pet) does not exceed the statutory limit.'})` : ''}
+      ${terms.petRent && terms.pets && terms.pets.length > 0 ? `<br><strong>Monthly Pet Rent:</strong> <strong>$${(terms.petRent * terms.pets.length).toFixed(2)}</strong> per month ($${terms.petRent.toFixed(2)} per pet × ${terms.pets.length} pet(s))` : ''}
     </div>
     <h3>Tenant Pet Responsibilities & Rules</h3>
     <ol>
@@ -156,8 +173,11 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <li><strong>Flooring Protection:</strong> Premises features premium hard-surface wood-style flooring. Protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats required under food/water bowls and litter boxes.</li>
       <li><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid causing floor warping/seam swelling constitutes damage beyond normal wear and tear.</li>
       <li><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only pH-neutral hard-surface floor cleaners permitted (no harsh solvents/bleach).</li>
-      <li><strong>Assistance Animals:</strong> Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.</li>
-      <li><strong>Violations:</strong> Breach of pet policy allows issuance of Nevada 5-Day Notice to Cure or Quit, leading to formal eviction proceedings if uncured.</li>
+      <li><strong>Assistance Animals:</strong> ${property.state === 'NV'
+        ? 'Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.'
+        : 'Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.'}
+      </li>
+      <li><strong>Violations:</strong> Breach of pet policy allows issuance of ${property.state === 'NV' ? 'Nevada 5-Day Notice to Cure or Quit' : 'California 3-Day Notice to Perform Covenant or Quit'}, leading to formal eviction proceedings if uncured.</li>
     </ol>
   ` : '';
 
@@ -185,7 +205,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
   // Nevada-specific sections
   const nevadaSections = property.state === 'NV' ? `
-    <h2>4. Lease Terms & Conditions</h2>
+    <h2>5. Lease Terms & Conditions</h2>
     <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
     <h2>5. Default and Remedies</h2>
@@ -217,33 +237,27 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <p>If any clause, provision, or statutory reference within this Lease is found to be void, illegal, or legally unenforceable under Nevada law (including NRS Chapter 118A), such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remainder of the Lease shall remain in full force and effect.</p>
     </div>
 
-    <h2>7. Nevada Specific Provisions & Required Disclosures</h2>
+    <h2>6. Nevada Specific Provisions & Required Disclosures</h2>
     <ul>
       <li><strong>NRS Chapter 118A Compliance:</strong> Complies fully with Nevada landlord-tenant laws. Free copy of signed lease and inventory/condition record provided.</li>
       <li><strong>Nuisance Provision (NRS 202.470 / 118A.200):</strong> Nuisance/disturbances strictly prohibited (misdemeanor under NV law). Reports can be submitted to Landlord in writing.</li>
-      <li><strong>Emergency Contact:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260).</li>
-      <li><strong>Flag Display:</strong> Tenants retain right to display US Flag per NRS 118A.325.</li>
+      <li><strong>Emergency Contact & Flag Display:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260). Tenants retain right to display US Flag per NRS 118A.325.</li>
       <li><strong>Foreclosure Disclosure (NRS 118A.275):</strong> Landlord discloses property is NOT currently subject to foreclosure proceedings.</li>
     </ul>
   ` : `
-    <h2>4. Lease Terms & Conditions</h2>
-    <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
-    <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
-    <h2>5. Default and Remedies</h2>
-    <p><strong>Event of Default:</strong> Tenant shall be in default if rent is not paid within 5 days of due date, or if any lease term is violated.</p>
-    <p><strong>Landlord's Remedies:</strong> Landlord may terminate lease, pursue eviction, and seek damages. Attorney's fees may be awarded to prevailing party.</p>
-    <h2>6. Governing Law and Severability</h2>
-    <p><strong>Choice of Law:</strong> This Lease shall be governed by the laws of the State of ${property.state === 'CA' ? 'California' : 'Nevada'}.</p>
-    <p><strong>Severability:</strong> If any provision is invalid, remaining provisions remain in full force.</p>
+<h2>5. Lease Terms & Conditions</h2>
+     <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
+     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
+     ${property.state === 'CA' ? `<p><strong>Snow & Freeze Protection:</strong> Landlord-provided snow removal is strictly limited to seasonal driveway plowing. Tenant is responsible for clearing snow and ice from walkways, steps, entryways, and decks. Tenant agrees to maintain the property heating system at a minimum of 55°F at all times during the lease term to prevent freeze damage to plumbing.</p>` : ''}
+     <p><strong>Default & Governing Law:</strong> Default allows landlord full legal remedies under ${property.state === 'CA' ? 'California' : 'Nevada'} law. Governed by State of ${property.state === 'CA' ? 'California' : 'Nevada'} statutes.</p>
   `;
 
   // Utility companies based on location
   const utilityCompanies = property.city === 'Truckee' ? `
-    <tr><th>Tahoe Public Utility District (Electric)</th><td>(530) 587-3896 &bull; www.tdpud.org</td></tr>
-    <tr><th>Truckee Donner PUD (Water)</th><td>(530) 587-3896 &bull; www.tdpud.org</td></tr>
-    <tr><th>Southwest Gas (Gas)</th><td>(877) 860-6020 &bull; www.swgas.com</td></tr>
-    <tr><th>Tahoe Truckee Sierra Disposal (Trash)</th><td>(530) 583-7800 &bull; www.tahoetruckeesierradisposal.com</td></tr>
-    <tr><th>Spectrum / AT&T (Internet)</th><td>Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</td></tr>
+    <tr><th>Electric & Water</th><td>Truckee Donner PUD (TDPUD) &bull; (530) 587-3896 | www.tdpud.org</td></tr>
+    <tr><th>Gas</th><td>Southwest Gas &bull; (877) 860-6020 | www.swgas.com</td></tr>
+    <tr><th>Trash</th><td>Tahoe Truckee Sierra Disposal &bull; (530) 583-7800 | www.tahoetruckeesierradisposal.com</td></tr>
+    <tr><th>Internet</th><td>Spectrum / AT&T &bull; Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</td></tr>
   ` : `
     <tr><th>NV Energy (Electric & Gas)</th><td>(775) 834-4444 &bull; www.nvenergy.com</td></tr>
     <tr><th>Truckee Meadows Water Authority</th><td>(775) 834-8080 &bull; www.tmwa.com</td></tr>
@@ -509,7 +523,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <div class="header">
             <h1>Residential Lease Agreement</h1>
-            <div class="subtitle">State of ${property.state}</div>
+            <div class="subtitle">State of ${property.state} &bull; Effective Date: ${today}</div>
         </div>
 
         <table class="grid-2">
@@ -551,84 +565,61 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
             </tr>
         </table>
 
-        <h2>2. Financial Terms</h2>
-        <h3>Rent</h3>
+        <h2>2. Financial Terms: Rent & Security Deposit</h2>
         <table class="table-summary">
-            <tr>
-                <th>Monthly Rent</th>
-                <td><strong>$${totalMonthlyRent(terms).toFixed(2) || '0.00'}</strong> per month, due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.</td>
-            </tr>
-            <tr>
-                <th>Base Rent</th>
-                <td><strong>$${terms.monthlyRent?.toFixed(2) || '0.00'}</strong> per month</td>
-            </tr>
-            ${totalMonthlyUtilityReimbursement(terms) > 0 ? `
-            <tr>
-                <th>Utility Reimbursements</th>
-                <td><strong>$${totalMonthlyUtilityReimbursement(terms).toFixed(2)}</strong> per month (added to rent)</td>
-            </tr>
-            ` : ''}
-        </table>
 
-        <h3>Move-In Deposits and Fees</h3>
-        <table class="table-summary">
+            <tr>
+                <th>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? 'Pre-paid Rent' : 'Monthly Rent'}</th>
+                <td><strong>$${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; const totalPrepaidRent = ((terms.monthlyRent || 0) * months) + ((terms.petRent || 0) * numPets * months); return totalPrepaidRent.toFixed(2); })() : (terms.monthlyRent?.toFixed(2) || '0.00')}</strong>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; return ` total (monthly rent $${terms.monthlyRent?.toFixed(2) || '0.00'} × ${months} months = $${((terms.monthlyRent || 0) * months).toFixed(2)}${numPets > 0 && terms.petRent ? ` + pet rent $${terms.petRent?.toFixed(2) || '0.00'} × ${numPets} pets × ${months} months = $${((terms.petRent || 0) * numPets * months).toFixed(2)}` : ''})`; })() : ` per month, due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.`}</td>
+            </tr>
             <tr>
                 <th>Security Deposit</th>
-                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (Returned within 30 days of move-out per ${property.state === 'NV' ? 'NRS law' : 'CA Civil Code'}, less legal deductions).</td>
+                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (Returned within ${property.state === 'CA' ? '21 calendar days' : '30 days'} of move-out per ${property.state === 'CA' ? 'CA Civil Code § 1950.5' : 'NV law'}, less legal deductions).</td>
             </tr>
-            ${terms.petsAllowed && terms.petDeposit ? `
-            <tr>
-                <th>Pet Deposit</th>
-                <td><strong>$${terms.petDeposit?.toFixed(2) || '0.00'}</strong> ${property.state === 'NV' ? '(Held under NRS 118A.242)' : '(Refundable pet deposit)'}.</td>
-            </tr>
-            ` : ''}
-            <tr>
-                <th>Total Move-In Cost</th>
-                <td><strong>$${((terms.securityDeposit || 0) + ((terms.petsAllowed && terms.petDeposit) ? terms.petDeposit : 0)).toFixed(2)}</strong> (Security Deposit${terms.petsAllowed && terms.petDeposit ? ' + Pet Deposit' : ''})</td>
-            </tr>
-        </table>
-
-        <h3>Late Fees & Other Charges</h3>
-        <table class="table-summary">
             <tr>
                 <th>Late Fee</th>
-                <td><strong>5% of base rent ($${(terms.monthlyRent ? terms.monthlyRent * 0.05 : 0).toFixed(2)})</strong>, imposed after at least ${property.state === 'NV' ? '3' : '5'} calendar days grace period ${property.state === 'NV' ? '(NRS 118A.210)' : '(CA Civil Code § 1671)'}. Non-compounding.</td>
+                <td><strong>${property.state === 'CA' ? 'Reasonable fee, up to 5% of periodic rent' : '5% of periodic rent'} ($${(terms.monthlyRent ? terms.monthlyRent * 0.05 : 0).toFixed(2)})</strong>, ${property.state === 'CA' ? 'representing a reasonable pre-estimate of administrative costs (CA Civil Code § 1671).' : 'imposed after at least 3 calendar days grace period (NRS 118A.210). Non-compounding.'}</td>
             </tr>
             <tr>
                 <th>Returned Check Fee</th>
-                <td><strong>$${terms.returnedCheckFee?.toFixed(2) || (property.state === 'NV' ? '25.00' : '30.00')}</strong> for any check returned unpaid / dishonored ${property.state === 'NV' ? '(NRS 118A.200)' : '(CA Civil Code § 1719)'}.</td>
+                <td><strong>$${property.state === 'CA' ? (terms.returnedCheckFeeSubsequent ? `${terms.returnedCheckFee?.toFixed(2) || '25.00'} first / $${terms.returnedCheckFeeSubsequent.toFixed(2)} subsequent` : `${terms.returnedCheckFee?.toFixed(2) || '25.00'} first / $35 subsequent`) : (terms.returnedCheckFee?.toFixed(2) || '25.00')}</strong> for any check returned unpaid / dishonored (${property.state === 'CA' ? 'CA Civil Code § 1719' : 'NRS 118A.200'}).</td>
             </tr>
         </table>
 
         <h2>3. Occupants & Utilities</h2>
-        <p><strong>Authorized Occupants:</strong> ${tenants.map(t => t.name).join(', ')}.</p>
+        <p><strong>Authorized Occupants:</strong> ${(terms.occupants || []).join(', ') || 'None specified'}.</p>
 
         <table class="table-summary">
             <tr>
                 <th>Tenant Direct Responsibility</th>
-                <td>Water, Garbage, Electricity, Gas, Internet, Cable TV</td>
+                <td>${(terms.utilitiesTenantResponsible || []).length > 0 ? terms.utilitiesTenantResponsible.join(', ') : 'None'}</td>
             </tr>
-            <tr>
+            ${(terms.utilitiesReimbursed || []).length > 0 ? `<tr>
                 <th>Landlord Paid & Tenant Reimbursed</th>
-                <td><strong>Sewer ($61.00/month)</strong> — Added to monthly rent; remains in Landlord's account.</td>
-            </tr>
+                <td>${(terms.utilitiesReimbursed || []).map(u => {
+                    const amount = terms.utilityReimbursementAmounts?.[u];
+                    return `<strong>${u}${amount ? ` ($${amount.toFixed(2)}/month)` : ''}</strong>`;
+                }).join(', ')} — Added to monthly rent; remains in Landlord's account.</td>
+            </tr>` : ''}
             <tr>
                 <th>Included in Rent (No Charge)</th>
-                <td>None</td>
+                <td>${(terms.utilitiesIncluded || []).length > 0 ? terms.utilitiesIncluded.join(', ') : 'None'}</td>
             </tr>
         </table>
 
-        ${nevadaSections}
-
         ${petBlock}
 
-        <h2>${property.state === 'NV' ? '9' : '8'}. Utility Company Reference Addendum (${utilityLocation})</h2>
+        ${nevadaSections}
+
+        ${disclosuresSection}
+
+        <h2>7. Utility Company Reference Addendum (${utilityLocation})</h2>
         <table class="table-summary">
             ${utilityCompanies}
         </table>
 
-        <h2>${property.state === 'NV' ? '10' : '9'}. Signatures & Execution</h2>
-        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ________________________.</p>
+        <h2>8. Signatures & Execution</h2>
+        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ${today}.</p>
 
         ${sigTable}
 
@@ -637,6 +628,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
             This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California and Nevada under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
             <ul>
                 <li>Signature records include timestamp, IP address, user agent, and signature image audit trails.</li>
+                <li>This document is provided for informational purposes; parties should consult legal counsel for compliance.</li>
             </ul>
         </div>
 
@@ -1086,8 +1078,8 @@ export const generateHTML2PDF = async (lease: LeaseDocument): Promise<Blob> => {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = htmlContent;
   tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '0'; tempDiv.style.top = '0'; tempDiv.style.width = '800px'; tempDiv.style.pointerEvents = 'none';
-  tempDiv.style.opacity = '0';
+  tempDiv.style.left = '0'; tempDiv.style.top = '0'; tempDiv.style.width = '800px'; tempDiv.style.transform = 'translate(-100%, -100%)'; tempDiv.style.pointerEvents = 'none';
+  tempDiv.style.top = '0';
   document.body.appendChild(tempDiv);
 
   try {
