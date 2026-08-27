@@ -626,7 +626,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <table class="table-summary">
             ${utilityCompanies}
         </table>
-        <p><strong>Tenant Utility Responsibility:</strong> Tenant shall be sole responsible for selecting, connecting, and paying for all utility services serving the Premises during the lease term, except as explicitly provided herein. Tenant agrees to transfer and establish all required utility accounts directly in Tenant’s name effective on or before the first day of the Lease Term (Move-In Date). If Tenant fails to transfer required utilities to Tenant’s name by the Move-In Date, Tenant shall immediately reimburse Landlord for all utility charges billed to Landlord for Tenant’s period of occupancy</p>
+        <p><strong>Tenant Utility Responsibility:</strong> Tenant shall be solely responsible for selecting, connecting, and paying for all utility services serving the Premises during the lease term, except as explicitly provided herein. Tenant agrees to transfer and establish all required utility accounts directly in Tenant’s name effective on or before the first day of the Lease Term (Move-In Date). If Tenant fails to transfer required utilities to Tenant’s name by the Move-In Date, Tenant shall immediately reimburse Landlord for all utility charges billed to Landlord for Tenant’s period of occupancy</p>
 
         <h2>10. Signatures & Execution</h2>
         <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ________________.</p>
