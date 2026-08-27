@@ -635,7 +635,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <div class="legal-notice">
             <h4>Legal & Digital Signature Notice</h4>
-            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
+                This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in Nevada under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA) (NRS Chapter 719).
             <ul>
                 <li>Signature records include timestamp, IP address, user agent, and signature image audit trails.</li>
                 <li>This document is provided for informational purposes; parties should consult legal counsel for compliance.</li>
