@@ -587,12 +587,12 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         </table>
 
         <h2>3. Occupants & Utilities</h2>
-        <p><strong>Authorized Occupants:</strong> None (Only named signing Tenants are permitted to reside on the premises. Guest stays exceeding 14 consecutive days require Landlord's prior written approval).</p>
+        <p><strong>Authorized Tenants and Occupants:</strong> ${[...tenants.map(t => t.name), ...(terms.occupants || [])].join(', ') || 'None'}. Only named signing Tenants are permitted to reside on the premises. Guest stays exceeding 14 consecutive days require Landlord's prior written approval.</p>
 
         <table class="table-summary">
             <tr>
                 <th>Tenant Direct Responsibility</th>
-                <td>${(terms.utilitiesTenantResponsible || []).length > 0 ? terms.utilitiesTenantResponsible.join(', ') : 'None'}</td>
+                <td>${(terms.utilitiesTenantResponsible || []).filter(u => !terms.utilitiesReimbursed || !terms.utilitiesReimbursed.includes(u)).length > 0 ? (terms.utilitiesTenantResponsible || []).filter(u => !terms.utilitiesReimbursed || !terms.utilitiesReimbursed.includes(u)).join(', ') : 'None'}</td>
             </tr>
             ${(terms.utilitiesReimbursed || []).length > 0 ? `<tr>
                 <th>Landlord Paid & Tenant Reimbursed</th>
