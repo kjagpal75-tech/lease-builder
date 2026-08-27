@@ -702,7 +702,6 @@ export const formatDisclosuresForLease = (property: Property): string => {
 
   return `
         <h2>8. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
-        <p><strong>State of ${property.state} &bull; ${property.type} located in ${property.city || '[city]'}, ${property.state}.</strong></p>
         <ol>
         ${disclosures.map((d) => {
           const title = `${d.title}${d.statute ? ` (${d.statute})` : ''}`;
