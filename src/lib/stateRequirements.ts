@@ -526,14 +526,13 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
       statute: 'NRS 118A.200; NRS 202.470',
       category: 'required',
       reason: 'Required Nevada rental agreement provisions',
-      leaseText: [
-        'NUISANCE PROVISION (NRS 118A.200 / NRS 202.470)',
-        'Tenant shall not engage in conduct that constitutes a nuisance. Under NRS 202.470, a person',
-        'who commits or maintains a public nuisance is guilty of a misdemeanor. Tenant may report',
-        'suspected nuisances or building/housing code violations to Landlord in writing and/or to',
-        'the appropriate local code enforcement agency. Landlord\'s procedure for receiving such',
-        'reports is via the contact information stated in this Lease.',
-      ].join('\n'),
+        leaseText: [
+          'Tenant shall not engage in conduct that constitutes a nuisance. Under NRS 202.470, a person',
+          'who commits or maintains a public nuisance is guilty of a misdemeanor. Tenant may report',
+          'suspected nuisances or building/housing code violations to Landlord in writing and/or to',
+          'the appropriate local code enforcement agency. Landlord\'s procedure for receiving such',
+          'reports is via the contact information stated in this Lease.',
+        ].join('\n'),
     });
 
     disclosures.push({
@@ -542,9 +541,8 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
       statute: 'NRS 118A.325 (and related flag display protections)',
       category: 'required',
       reason: 'Nevada tenant flag-display rights',
-      leaseText: [
-        'UNITED STATES FLAG DISPLAY',
-        'Tenant has the right to display the flag of the United States on the premises in a manner',
+        leaseText: [
+          'Tenant has the right to display the flag of the United States on the premises in a manner',
         'consistent with Nevada law and any reasonable rules regarding size, placement, and safety.',
       ].join('\n'),
     });
@@ -559,12 +557,10 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
         : 'Affirmative disclosure required; property not currently in foreclosure',
       leaseText: flags.subjectToForeclosure
         ? [
-            'FORECLOSURE DISCLOSURE (NRS 118A.275)',
             'WARNING: Landlord discloses that the property to be leased is the subject of foreclosure',
             'proceedings. Willful failure to disclose foreclosure proceedings is a deceptive trade practice.',
           ].join('\n')
         : [
-            'FORECLOSURE DISCLOSURE (NRS 118A.275)',
             'Landlord discloses that, as of the date of this Lease, the property is not the subject of',
             'any foreclosure proceedings. If that status changes, Landlord will notify Tenant as required by law.',
           ].join('\n'),
