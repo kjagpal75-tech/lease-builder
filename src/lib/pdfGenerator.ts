@@ -1,9 +1,27 @@
 import { LeaseDocument } from '@/types/lease';
 import { generateProfessionalLeaseHTML } from './html2pdfGenerator';
 
-export const generatePDF = async (lease: LeaseDocument): Promise<void> => {
+/** Sanitize string for use in filename - remove/replace invalid characters */
+function sanitizeFilename(str: string): string {
+  return str
+    .replace(/[^a-zA-Z0-9\s\-_,]/g, '')
+    .replace(/\s+/g, '_')
+    .substring(0, 100);
+}
+
+/** Generate filename for PDF based on property address */
+export function generatePDFFilename(lease: LeaseDocument): string {
+  const address = lease.property.address || 'Unknown_Address';
+  const sanitizedAddress = sanitizeFilename(address);
+  return `Lease_Agreement_${sanitizedAddress}.pdf`;
+}
+
+export const generatePDF = async (lease: LeaseDocument, filename?: string): Promise<void> => {
   // Generate the professional HTML template (same as HTML preview)
   const htmlContent = generateProfessionalLeaseHTML(lease);
+  
+  // Use provided filename or generate one based on address
+  const pdfFilename = filename || generatePDFFilename(lease);
 
   // Open the HTML in a new window with print styles for PDF generation
   const printWindow = window.open('', '_blank', 'width=800,height=900,popup=yes');
@@ -12,13 +30,14 @@ export const generatePDF = async (lease: LeaseDocument): Promise<void> => {
   }
 
   // Write the HTML content with print-optimized styles
+  // The document title will be used as the suggested filename when saving as PDF
   printWindow.document.open();
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Lease Agreement - ${lease.id}</title>
+      <title>${pdfFilename.replace('.pdf', '')}</title>
       <style>
         @media print {
           body { 
@@ -62,7 +81,9 @@ export const previewPDF = async (lease: LeaseDocument) => {
 
 export const downloadPDF = async (lease: LeaseDocument, filename?: string) => {
   try {
-    await generatePDF(lease);
+    // Use the address-based filename when downloading
+    const pdfFilename = filename || generatePDFFilename(lease);
+    await generatePDF(lease, pdfFilename);
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw new Error('Failed to download PDF');

@@ -170,9 +170,9 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <h3>Tenant Pet Responsibilities & Rules</h3>
     <ol>
       <li><strong>Control & Sanitation:</strong> Must be leashed outdoors. Immediate waste disposal in trash receptacles required.</li>
-      <li><strong>Flooring Protection:</strong> Premises features premium hard-surface wood-style flooring. Protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats required under food/water bowls and litter boxes.</li>
-      <li><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid causing floor warping/seam swelling constitutes damage beyond normal wear and tear.</li>
-      <li><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only pH-neutral hard-surface floor cleaners permitted (no harsh solvents/bleach).</li>
+      <li><strong>Flooring Protection:</strong> Protective area rugs, runners, or mats must be placed in high-traffic pathways and pet resting areas to prevent wear, scratches, or staining on flooring (whether carpet, hardwood, or other surfaces). 100% waterproof mats required under food/water bowls and litter boxes.</li>
+      <li><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid or moisture can cause floor damage, staining, odor, or subfloor issues and constitutes damage beyond normal wear and tear.</li>
+      <li><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only manufacturer-approved, pH-neutral cleaners appropriate for the flooring type may be used (no harsh solvents, bleach, or abrasive scrubbers).</li>
       <li><strong>Assistance Animals:</strong> ${property.state === 'NV'
         ? 'Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.'
         : 'Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.'}
@@ -208,7 +208,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <h2>5. Lease Terms & Conditions</h2>
     <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
-    <h2>5. Default and Remedies</h2>
+    <h2>6. Default and Remedies</h2>
     <div class="card">
       <h3>A. Event of Default</h3>
       <p>Tenant shall be deemed in material default of this Lease Agreement if: 1) Tenant fails to pay Rent, utility reimbursements, or any other financial obligation within the timelines specified herein; or 2) Tenant, authorized occupants, or guests violate any material covenant, condition, or rule of this Lease Agreement, including the attached Pet Policy Addendum.</p>
@@ -225,7 +225,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <p>In compliance with NRS 118A.220(1)(c), if either party brings a formal legal action to enforce or interpret the terms of this Lease Agreement, the court may award reasonable attorney's fees and actual litigation costs strictly to the prevailing party.</p>
     </div>
 
-    <h2>6. Governing Law and Severability</h2>
+    <h2>7. Governing Law and Severability</h2>
     <div class="card">
       <h3>A. Choice of Law</h3>
       <p>This Lease Agreement, along with all incorporated addendums, disclosures, and subsequent modifications, shall be governed by, construed, and enforced strictly in accordance with the laws of the State of Nevada.</p>
@@ -237,19 +237,13 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <p>If any clause, provision, or statutory reference within this Lease is found to be void, illegal, or legally unenforceable under Nevada law (including NRS Chapter 118A), such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remainder of the Lease shall remain in full force and effect.</p>
     </div>
 
-    <h2>6. Nevada Specific Provisions & Required Disclosures</h2>
-    <ul>
-      <li><strong>NRS Chapter 118A Compliance:</strong> Complies fully with Nevada landlord-tenant laws. Free copy of signed lease and inventory/condition record provided.</li>
-      <li><strong>Nuisance Provision (NRS 202.470 / 118A.200):</strong> Nuisance/disturbances strictly prohibited (misdemeanor under NV law). Reports can be submitted to Landlord in writing.</li>
-      <li><strong>Emergency Contact & Flag Display:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260). Tenants retain right to display US Flag per NRS 118A.325.</li>
-      <li><strong>Foreclosure Disclosure (NRS 118A.275):</strong> Landlord discloses property is NOT currently subject to foreclosure proceedings.</li>
-    </ul>
   ` : `
 <h2>5. Lease Terms & Conditions</h2>
      <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
      <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
      ${property.state === 'CA' ? `<p><strong>Snow & Freeze Protection:</strong> Landlord-provided snow removal is strictly limited to seasonal driveway plowing. Tenant is responsible for clearing snow and ice from walkways, steps, entryways, and decks. Tenant agrees to maintain the property heating system at a minimum of 55°F at all times during the lease term to prevent freeze damage to plumbing.</p>` : ''}
-     <p><strong>Default & Governing Law:</strong> Default allows landlord full legal remedies under ${property.state === 'CA' ? 'California' : 'Nevada'} law. Governed by State of ${property.state === 'CA' ? 'California' : 'Nevada'} statutes.</p>
+     <p><strong>Default & Remedies:</strong> Failure to pay rent, utilities, or maintain terms (including pet and freeze protection rules) constitutes a material breach. Upon default, Landlord may issue statutory notices (e.g., 3-Day Notice to Pay or Quit / Perform Covenant) and pursue all legal and equitable remedies under California law, including possession, damages, and reasonable attorney fees where permitted by law.</p>
+     <p><strong>Governing Law & Severability:</strong> Governed by the laws of the State of California. Venue shall be in the county where the property is located. If any provision is deemed invalid, all remaining terms remain in full effect.</p>
   `;
 
   // Utility companies based on location
@@ -523,7 +517,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <div class="header">
             <h1>Residential Lease Agreement</h1>
-            <div class="subtitle">State of ${property.state} &bull; Effective Date: ${today}</div>
+            <div class="subtitle">State of ${property.state}</div>
         </div>
 
         <table class="grid-2">
@@ -570,7 +564,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
             <tr>
                 <th>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? 'Pre-paid Rent' : 'Monthly Rent'}</th>
-                <td><strong>$${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; const totalPrepaidRent = ((terms.monthlyRent || 0) * months) + ((terms.petRent || 0) * numPets * months); return totalPrepaidRent.toFixed(2); })() : (terms.monthlyRent?.toFixed(2) || '0.00')}</strong>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; return ` total (monthly rent $${terms.monthlyRent?.toFixed(2) || '0.00'} × ${months} months = $${((terms.monthlyRent || 0) * months).toFixed(2)}${numPets > 0 && terms.petRent ? ` + pet rent $${terms.petRent?.toFixed(2) || '0.00'} × ${numPets} pets × ${months} months = $${((terms.petRent || 0) * numPets * months).toFixed(2)}` : ''})`; })() : ` per month, due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.`}</td>
+                <td><strong>$${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; const reimbAmounts = terms.utilityReimbursementAmounts || {}; const reimbUtilities = terms.utilitiesReimbursed || []; const utilityReimbTotal = reimbUtilities.reduce((sum, u) => sum + (reimbAmounts[u] || 0), 0); const totalPrepaidRent = ((terms.monthlyRent || 0) * months) + ((terms.petRent || 0) * numPets * months) + (utilityReimbTotal * months); return totalPrepaidRent.toFixed(2); })() : ((terms.monthlyRent || 0) + (terms.utilitiesReimbursed || []).reduce((sum, u) => sum + ((terms.utilityReimbursementAmounts || {})[u] || 0), 0)).toFixed(2)}</strong>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; const reimbAmounts = terms.utilityReimbursementAmounts || {}; const reimbUtilities = terms.utilitiesReimbursed || []; const utilityReimbTotal = reimbUtilities.reduce((sum, u) => sum + (reimbAmounts[u] || 0), 0); return ` total (monthly rent $${terms.monthlyRent?.toFixed(2) || '0.00'} × ${months} months = $${((terms.monthlyRent || 0) * months).toFixed(2)}${numPets > 0 && terms.petRent ? ` + pet rent $${terms.petRent?.toFixed(2) || '0.00'} × ${numPets} pets × ${months} months = $${((terms.petRent || 0) * numPets * months).toFixed(2)}` : ''}${utilityReimbTotal > 0 ? ` + utility reimbursement $${utilityReimbTotal.toFixed(2)} × ${months} months = $${(utilityReimbTotal * months).toFixed(2)}` : ''}${terms.holdingDeposit ? '. Holding Deposit applies toward this total upon move-in.' : ''})`; })() : ` per month (base rent $${terms.monthlyRent?.toFixed(2) || '0.00'}${(terms.utilitiesReimbursed || []).length > 0 ? ` + utility reimbursement $${(terms.utilitiesReimbursed || []).reduce((sum, u) => sum + ((terms.utilityReimbursementAmounts || {})[u] || 0), 0).toFixed(2)}` : ''}), due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.`}</td>
             </tr>
             <tr>
                 <th>Security Deposit</th>
@@ -584,10 +578,16 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
                 <th>Returned Check Fee</th>
                 <td><strong>$${property.state === 'CA' ? (terms.returnedCheckFeeSubsequent ? `${terms.returnedCheckFee?.toFixed(2) || '25.00'} first / $${terms.returnedCheckFeeSubsequent.toFixed(2)} subsequent` : `${terms.returnedCheckFee?.toFixed(2) || '25.00'} first / $35 subsequent`) : (terms.returnedCheckFee?.toFixed(2) || '25.00')}</strong> for any check returned unpaid / dishonored (${property.state === 'CA' ? 'CA Civil Code § 1719' : 'NRS 118A.200'}).</td>
             </tr>
+            ${terms.holdingDeposit ? `
+            <tr>
+                <th>Holding / Reservation Deposit</th>
+                <td><strong>$${terms.holdingDeposit.toFixed(2)}</strong> due on or before ______________________ to secure the tenancy and remove the property from the market. Upon move-in and fulfillment of all initial lease terms, this deposit will be credited toward Rent due under this Lease. If Tenant cancels or fails to take occupancy, Landlord may deduct actual damages (prorated rent for time held off-market and re-listing costs) and return any remaining balance within 14 days.</td>
+            </tr>
+            ` : ''}
         </table>
 
         <h2>3. Occupants & Utilities</h2>
-        <p><strong>Authorized Occupants:</strong> ${(terms.occupants || []).join(', ') || 'None specified'}.</p>
+        <p><strong>Authorized Occupants:</strong> None (Only named signing Tenants are permitted to reside on the premises. Guest stays exceeding 14 consecutive days require Landlord's prior written approval).</p>
 
         <table class="table-summary">
             <tr>
@@ -613,19 +613,19 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         ${disclosuresSection}
 
-        <h2>7. Utility Company Reference Addendum (${utilityLocation})</h2>
+        <h2>9. Utility Company Reference Addendum (${utilityLocation})</h2>
         <table class="table-summary">
             ${utilityCompanies}
         </table>
 
-        <h2>8. Signatures & Execution</h2>
-        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ${today}.</p>
+        <h2>10. Signatures & Execution</h2>
+        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ________________.</p>
 
         ${sigTable}
 
         <div class="legal-notice">
             <h4>Legal & Digital Signature Notice</h4>
-            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California and Nevada under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
+            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
             <ul>
                 <li>Signature records include timestamp, IP address, user agent, and signature image audit trails.</li>
                 <li>This document is provided for informational purposes; parties should consult legal counsel for compliance.</li>

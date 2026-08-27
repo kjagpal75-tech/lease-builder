@@ -154,8 +154,9 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
         'at which personal service may be effected of (1) the manager of the premises, and',
         '(2) an owner of the premises or a person authorized to act for and on behalf of the',
         'owner for the purpose of service of process and receiving notices and demands.',
-        'Landlord also discloses where and how rent payments are to be made, and the forms of payment accepted.',
         'A copy of this signed Lease will be provided to Tenant within 15 days of execution.',
+        '',
+        'PAYMENT OF RENT: Rent shall be paid via Electronic Funds Transfer / Zelle / Check to the Landlord at the address set forth above. Electronic Funds Transfer (EFT) and Zelle payments are the preferred and primary methods of payment. Personal or cashier checks are also accepted, made payable to the Landlord and mailed or delivered to the Landlord at the address disclosed in this Lease. Cash is not accepted.',
       ].join('\n'),
     });
 
@@ -654,17 +655,63 @@ export const getStateSpecificClauses = (state: State): string[] => {
  * Formats disclosures for lease generation as HTML cards matching the application layout.
  * Each disclosure becomes a card with title and text content.
  */
+/**
+ * Strips the duplicated title from the disclosure body. The body text typically
+ * starts with the title in all caps, followed by the actual disclosure content.
+ * This removes the first line if it duplicates the title.
+ */
+function stripDuplicateTitle(body: string, title: string, statute?: string): string {
+  if (!body) return body;
+
+  // Normalize a string for comparison: uppercase, replace special chars with spaces, collapse spaces
+  const normalize = (s: string): string => {
+    return s.toUpperCase().replace(/[^A-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  };
+
+  const titleNorm = normalize(title);
+  const lines = body.split('\n');
+
+  for (let i = 0; i < Math.min(2, lines.length); i++) {
+    const line = lines[i].trim();
+    const lineNorm = normalize(line);
+
+    // Get significant words from the title (3+ chars)
+    const titleWords = titleNorm.split(' ').filter(w => w.length >= 3);
+    if (titleWords.length === 0) continue;
+
+    // Check if all title words appear in order in the line (fuzzy prefix match)
+    let allFound = true;
+    let searchFrom = 0;
+    for (const tw of titleWords) {
+      const idx = lineNorm.indexOf(tw, searchFrom);
+      if (idx === -1) {
+        allFound = false;
+        break;
+      }
+      searchFrom = idx + tw.length;
+    }
+
+    if (allFound) {
+      lines.splice(i, 1);
+      return lines.join('\n').trim();
+    }
+  }
+
+  return body;
+}
+
 export const formatDisclosuresForLease = (property: Property): string => {
   const disclosures = getApplicableDisclosures(property);
   if (disclosures.length === 0) return '';
 
   return `
-        <h2>6. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
+        <h2>8. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
         <p><strong>State of ${property.state} &bull; ${property.type} located in ${property.city || '[city]'}, ${property.state}.</strong></p>
         <ol>
         ${disclosures.map((d) => {
           const title = `${d.title}${d.statute ? ` (${d.statute})` : ''}`;
-          return `<li><strong>${title}</strong><br>${d.leaseText}</li>`;
+          const body = stripDuplicateTitle(d.leaseText, d.title, d.statute);
+          return `<li><strong>${title}</strong><br>${body}</li>`;
         }).join('')}
         </ol>`;
 };
