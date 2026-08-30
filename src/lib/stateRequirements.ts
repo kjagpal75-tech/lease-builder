@@ -304,21 +304,20 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
       });
     }
 
-    if (flags.inFloodHazardArea) {
-      disclosures.push({
-        id: 'ca-flood',
-        title: 'Flood Hazard Disclosure',
-        statute: 'Government Code § 8589.45',
-        category: 'conditional',
-        reason: 'Property flagged as located in a special flood hazard / potential flooding area',
-        leaseText: [
-          'FLOOD HAZARD DISCLOSURE (Government Code § 8589.45)',
-          'Landlord has actual knowledge that the property is located in a special flood hazard area',
-          'or an area of potential flooding. Tenant is advised to obtain flood insurance if desired,',
-          'as standard renters insurance often excludes flood damage.',
-        ].join('\n'),
-      });
-    }
+    disclosures.push({
+      id: 'ca-flood',
+      title: 'Flood Hazard Disclosure',
+      statute: 'Government Code § 8589.45',
+      category: 'required',
+      reason: 'Required for all California residential leases (Gov. Code § 8589.45)',
+      leaseText: [
+        'FLOOD HAZARD DISCLOSURE (Government Code § 8589.45)',
+        `Landlord discloses that the property is ${flags.inFloodHazardArea ? '' : 'NOT '}located in a Special Flood Hazard Area or Area of Potential Flooding to Landlord's actual knowledge.`,
+      ].join('\n'),
+    });
+
+
+
 
     if (flags.nearMilitaryOrdnance) {
       disclosures.push({
