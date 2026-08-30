@@ -10,6 +10,7 @@ import {
   OwnedProperty,
   HoldingDepositApplication,
   LeasePet,
+  CustomClause,
   RentPaymentSchedule,
   SmokingPolicy,
   State,
@@ -81,6 +82,11 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
   const [includeCoSigner, setIncludeCoSigner] = useState<boolean>(
     !!(initialData?.coSigners && initialData.coSigners.length > 0)
   );
+  // Editing state for a custom clause (null = adding a new one)
+  const [editingClauseId, setEditingClauseId] = useState<string | null>(null);
+  const [editingClauseText, setEditingClauseText] = useState<string>('');
+  const [editingClauseSection, setEditingClauseSection] = useState<string>('Lease Terms & Conditions');
+  const [newClauseText, setNewClauseText] = useState<string>('');
 
   useEffect(() => {
     setOwnedProperties(ownedPropertiesService.getAll());
@@ -276,6 +282,34 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
     handleTermsChange(field, newList);
   };
 
+  const addCustomClause = (text: string) => {
+    const newClause: CustomClause = {
+      id: uuidv4(),
+      section: 'Lease Terms & Conditions',
+      text: text,
+    };
+    setTerms(prev => ({
+      ...prev,
+      customClauses: [...(prev.customClauses || []), newClause],
+    }));
+  };
+
+  const updateCustomClause = (id: string, field: 'section' | 'text', value: string) => {
+    setTerms(prev => ({
+      ...prev,
+      customClauses: (prev.customClauses || []).map(c =>
+        c.id === id ? { ...c, [field]: value } : c
+      ),
+    }));
+  };
+
+  const removeCustomClause = (id: string) => {
+    setTerms(prev => ({
+      ...prev,
+      customClauses: (prev.customClauses || []).filter(c => c.id !== id),
+    }));
+  };
+
   const validatePhoneNumber = (phone: string): boolean => {
     // Check if phone matches (XXX) XXX-XXXX format
     const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
@@ -328,7 +362,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
   };
 
   const commonUtilities = [
-    'Water', 'Sewer', 'Garbage', 'Electricity', 'Gas',
+    'Water', 'Sewer', 'Trash', 'Electricity', 'Gas',
     'Internet', 'Cable TV', 'HOA Fees', 'Landscaping', 'Snow Removal'
   ];
 
@@ -652,6 +686,15 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
               required
               value={property.zipCode}
               onChange={(e) => handlePropertyChange('zipCode', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mailbox # (Optional)</label>
+            <input
+              type="text"
+              value={property.mailboxNumber || ''}
+              onChange={(e) => handlePropertyChange('mailboxNumber', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
             />
           </div>
@@ -1556,6 +1599,149 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
         </div>
       </section>
 
+      {/* Custom Clause / Provision */}
+      <section className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Custom Clause / Provision</h2>
+        <div className="space-y-4">
+          {/* Existing clauses: shown when editing an existing lease so saved text is visible/editable */}
+          {(terms.customClauses || []).length > 0 && (
+            <div className="space-y-3">
+              <div className="text-sm font-medium text-gray-700">
+                Saved Custom Clauses ({(terms.customClauses || []).length})
+              </div>
+              {(terms.customClauses || []).map((clause, idx) => (
+                <div
+                  key={clause.id}
+                  className="border border-gray-200 rounded-md p-3 bg-gray-50"
+                >
+                  {editingClauseId === clause.id ? (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Section</label>
+                        <input
+                          type="text"
+                          value={editingClauseSection}
+                          onChange={(e) => setEditingClauseSection(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Clause Text</label>
+                        <textarea
+                          value={editingClauseText}
+                          onChange={(e) => setEditingClauseText(e.target.value)}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (editingClauseText.trim()) {
+                              updateCustomClause(clause.id, 'section', editingClauseSection);
+                              updateCustomClause(clause.id, 'text', editingClauseText);
+                            }
+                            setEditingClauseId(null);
+                            setEditingClauseText('');
+                            setEditingClauseSection('Lease Terms & Conditions');
+                          }}
+                          className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingClauseId(null);
+                            setEditingClauseText('');
+                            setEditingClauseSection('Lease Terms & Conditions');
+                          }}
+                          className="px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="text-xs font-semibold text-gray-600">
+                          Clause {idx + 1} — Section: {clause.section}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingClauseId(clause.id);
+                              setEditingClauseText(clause.text);
+                              setEditingClauseSection(clause.section);
+                            }}
+                            className="text-xs text-blue-600 hover:text-blue-800 underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeCustomClause(clause.id)}
+                            className="text-xs text-red-600 hover:text-red-800 underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
+                        {clause.text}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-200 pt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Section (new clause)</label>
+              <select
+                value="Lease Terms & Conditions"
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+              >
+                <option value="Lease Terms & Conditions">Lease Terms & Conditions</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Custom Clause Text (new)</label>
+              <textarea
+                value={newClauseText}
+                onChange={(e) => setNewClauseText(e.target.value)}
+                placeholder="Enter your custom clause/provision text here..."
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (newClauseText.trim()) {
+                  addCustomClause(newClauseText);
+                  setNewClauseText('');
+                }
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+            >
+              + Add Clause
+            </button>
+          </div>
+          <div className="text-xs text-gray-500">
+            Add custom clauses or provisions that should be included in the lease agreement. These will appear in the generated lease document under the Custom Clause/Provision section. Saved clauses can be edited or removed above.
+          </div>
+        </div>
+      </section>
+
       <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
         <h3 className="text-sm font-semibold text-blue-900 mb-2">Monthly Rent Summary</h3>
         <div className="space-y-1 text-sm">
@@ -1574,6 +1760,50 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
       </div>
 
       <div className="flex gap-4">
+        <button
+          type="button"
+          onClick={() => {
+            const data = JSON.stringify({ landlords, tenants, property, terms, coSigners, attachments: initialData?.attachments || [] }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            a.download = `lease-backup-${property.address?.replace(/\s+/g, '-') || 'backup'}-${timestamp}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          className="px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
+        >
+          Export Backup (JSON)
+        </button>
+        <label className="px-4 py-3 bg-amber-600 text-white rounded-md hover:bg-amber-700 font-medium cursor-pointer">
+          Import Backup (JSON)
+          <input
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                try {
+                  const data = JSON.parse(ev.target?.result as string);
+                  if (data.landlords) setLandlords(data.landlords);
+                  if (data.tenants) setTenants(data.tenants);
+                  if (data.property) setProperty(normalizeProperty(data.property));
+                  if (data.terms) setTerms(normalizeLeaseTerms(data.terms));
+                  if (data.coSigners) { setCoSigners(data.coSigners); setIncludeCoSigner(true); }
+                  alert('Backup restored successfully.');
+                } catch {
+                  alert('Invalid backup file.');
+                }
+              };
+              reader.readAsText(file);
+            }}
+          />
+        </label>
         <button
           type="submit"
           className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 font-medium"
