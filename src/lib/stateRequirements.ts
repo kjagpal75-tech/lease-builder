@@ -183,14 +183,16 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
       category: 'required',
       reason: 'Required before creating a new California tenancy',
       leaseText: [
-        'BED BUG DISCLOSURE (Civil Code § 1954.603)',
-        'Information about Bed Bugs: Bed bug infestations can seriously affect the health',
-        'and quality of life of occupants. Bed bugs are small insects that feed on human blood.',
-        'They are typically active at night and hide in cracks, crevices, mattresses, and furniture.',
-        'Tenant agrees to promptly notify Landlord in writing of any known or suspected bed bug',
-        'infestation. Tenant shall not bring onto the premises personal belongings that Tenant',
-        'knows or reasonably should know are infested. Landlord will respond in accordance with',
-        'applicable law. Additional educational materials may be provided as an attachment.',
+        'Bed Bug Disclosure (Civil Code § 1954.603)',
+        'INFORMATION ABOUT BED BUGS',
+        '(a) Appearance: Bed bugs have six legs. Adult bed bugs have flat bodies about 1/4 of an inch in length. Their color can vary from red and brown to copper colored. Young bed bugs are very small. Their bodies are about 1/16 of an inch in length. They have almost no color. When a bed bug feeds, its body swells, may lengthen, and becomes bright red, sometimes making it appear to be a different insect. Bed bugs do not fly. They can either crawl or be carried from place to place on objects, people, or animals.',
+        '(b) Life Cycle and Reproduction: An average bed bug lives for about 10 months. Female bed bugs lay one to five eggs per day. Bed bugs grow to full adulthood in about 21 days. Bed bugs can survive for months without feeding.',
+        '(c) Bed Bug Bites: Because bed bugs usually feed at night, most people are bitten in their sleep and do not realize they were bitten. Common signs and symptoms of a possible bed bug infestation:',
+        '- Small red to reddish brown fecal spots on mattresses, box springs, bed frames, linens, upholstery, or walls.',
+        '- Molted bed bug skins, white, sticky eggs, or empty eggshells.',
+        '- Very heavily infested areas may have a characteristically sweet odor.',
+        '- Red, itchy bite marks on body parts exposed while sleeping.',
+        '(d) Reporting Procedure: Tenant shall promptly notify Landlord in writing within 24 hours of discovering or suspecting a bed bug infestation. Tenant shall not bring onto the premises personal belongings known or reasonably believed to be infested. Landlord shall arrange for inspection and treatment by a licensed pest control operator. Tenant shall fully cooperate with inspection and treatment measures.',
       ].join('\n'),
     });
 
@@ -252,7 +254,6 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
         ? [
             'NOTICE OF EXEMPTION FROM AB 1482:',
             'This property is not subject to the rent limits imposed by Section 1947.12 of the Civil Code and is not subject to the just cause requirements of Section 1946.2 of the Civil Code. This property meets the requirements of Sections 1947.12 (d)(5) and 1946.2 (e)(8) of the Civil Code and the owner is not any of the following: (1) a real estate investment trust, as defined by Section 856 of the Internal Revenue Code; (2) a corporation; or (3) a limited liability company in which at least one member is a corporation.',
-            'or other qualifying exemptions). Tenant acknowledges receipt of this exemption notice.',
           ].join('\n')
         : [
             'NOTICE REGARDING AB 1482 TENANT PROTECTION ACT (Civil Code §§ 1946.2, 1947.12)',
