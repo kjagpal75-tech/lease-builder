@@ -250,10 +250,8 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
           : 'Status notice included for California residential leases',
       leaseText: flags.ab1482Exempt
         ? [
-            'NOTICE OF EXEMPTION FROM AB 1482 (Civil Code §§ 1946.2, 1947.12)',
-            'Landlord represents that this tenancy is exempt from the Tenant Protection Act of 2019',
-            '(AB 1482) rent caps and/or just-cause eviction provisions based on an applicable statutory exemption',
-            '(for example, certain single-family homes / condominiums owned by natural persons with proper notice,',
+            'NOTICE OF EXEMPTION FROM AB 1482:',
+            'This property is not subject to the rent limits imposed by Section 1947.12 of the Civil Code and is not subject to the just cause requirements of Section 1946.2 of the Civil Code. This property meets the requirements of Sections 1947.12 (d)(5) and 1946.2 (e)(8) of the Civil Code and the owner is not any of the following: (1) a real estate investment trust, as defined by Section 856 of the Internal Revenue Code; (2) a corporation; or (3) a limited liability company in which at least one member is a corporation.',
             'or other qualifying exemptions). Tenant acknowledges receipt of this exemption notice.',
           ].join('\n')
         : [
