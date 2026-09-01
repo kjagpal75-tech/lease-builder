@@ -117,19 +117,18 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   const start = terms.startDate ? formatLocalDate(terms.startDate) : '';
   const end = terms.endDate ? formatLocalDate(terms.endDate) : '';
 
-  // Generate disclosures section
-  const normalizedPropertyForDisclosures = {
-    ...property,
-    disclosureFlags: {
-      ...defaultDisclosureFlags(),
-      ...(property.disclosureFlags || {}),
-    },
-  };
-  // Determine the disclosure section number based on state
-  // For NV: sections go 1, 2, 3, 4 (pets), 5, 6, 7, then disclosures = 8
-  // For CA: sections go 1, 2, 3, 4 (pets), 5, then disclosures = 6
-  const disclosureSectionNumber = property.state === 'NV' ? 8 : 6;
-  const disclosuresSection = formatDisclosuresForLease(normalizedPropertyForDisclosures, disclosureSectionNumber);
+   // Generate disclosures section
+   const normalizedPropertyForDisclosures = {
+     ...property,
+     disclosureFlags: {
+       ...defaultDisclosureFlags(),
+       ...(property.disclosureFlags || {}),
+     },
+   };
+   // Disclosures section number: CA=7 (after Furnishings at 6, before Utility at 8)
+   // NV=9 (after Furnishings at 8, before Utility at 10)
+   const disclosureSectionNumber = property.state === 'CA' ? 7 : 9;
+   const disclosuresSection = formatDisclosuresForLease(normalizedPropertyForDisclosures, disclosureSectionNumber);
 
   // Build landlord info with full details matching preview
   const landlordInfo = landlords.map((l, i) => `
@@ -212,7 +211,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <h2>5. Lease Terms & Conditions</h2>
     <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
-    <p><strong>Cleaning Requirement:</strong> Tenant shall surrender the property in a "broom-clean" condition, with all personal belongings, trash, and debris removed from the home, garage, and yard. Flooring, countertops, appliances, and fixtures must be thoroughly cleaned.</p>
+      <p><strong>Cleaning Requirement:</strong> Tenant shall surrender the property in a "broom-clean" condition, with all personal belongings, trash, and debris removed from the home, garage, and yard. Flooring, countertops, appliances, and fixtures must be cleaned to the same level of cleanliness documented at move-in.</p>
     <p><strong>Move-In/Move-Out Comparison:</strong> The physical condition of the property at move-out will be evaluated against the initial signed Inventory and Condition Record (referenced in Section 8.2).</p>
     <p><strong>Unauthorized Alterations:</strong> Any unauthorized alterations, paint colors, wall modifications, or fixtures installed by Tenant must be restored to their original condition at Tenant's expense prior to surrender.</p>
     <p><strong>Deductions for Cleaning & Repair:</strong> Pursuant to NRS 118A.242, Landlord reserves the right to deduct from the Security Deposit actual costs required for cleaning the unit to move-in standard or repairing damage beyond normal wear and tear.</p>
@@ -246,6 +245,15 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <p>If any clause, provision, or statutory reference within this Lease is found to be void, illegal, or legally unenforceable under Nevada law (including NRS Chapter 118A), such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remainder of the Lease shall remain in full force and effect.</p>
     </div>
 
+    <h2>8. Furnishings & Personal Property Addendum</h2>
+    <ul style="margin-top: 2px; margin-bottom: 8px; padding-left: 20px; font-size: 9.5pt; color: #2d3748; line-height: 1.45;">
+      <li>The Premises are leased fully furnished, including furniture, electronics, kitchenware (appliances, cookware, dishes, utensils), linens, and domestic supplies.</li>
+      <li>Inventory Record: An itemized Inventory and Condition Record of all provided furnishings and supplies will be reviewed and signed by Tenant upon move-in.</li>
+      <li>Care & Maintenance: Tenant agrees to maintain all furniture, housewares, and supplied items in good, clean, and operable condition. Tenant shall not remove any provided furnishings or supplies from the Premises.</li>
+      <li>Loss & Damage: Normal wear and tear is expected; however, Tenant shall be financially responsible for replacing or repairing any missing items, stained/damaged upholstery, or broken kitchenware beyond standard wear. Deductions for missing or damaged personal property may be made from the Security Deposit pursuant to California Civil Code § 1950.5.</li>
+      <li>Consumables: Landlord provides initial starter supplies (e.g., trash bags, paper products, soap). Tenant is responsible for replenishing all consumable goods for their own use during the lease term.</li>
+    </ul>
+
   ` : `
 <h2>5. Lease Terms & Conditions</h2>
      <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
@@ -257,17 +265,23 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
       <p>Provided, however, that the 14-day termination option shall be extended if Landlord has commenced diligent, good-faith efforts to cure or replace necessary equipment, and delay is caused solely by local utility outages, severe winter weather events preventing service access, or documented supply chain delays beyond Landlord's control, so long as Landlord provides temporary reasonable accommodations or alternative solutions where feasible.</p>
      <p><strong>Move-In/Move-Out Inspection & Baseline:</strong> The physical condition and cleanliness of the Premises at move-out will be evaluated against the initial signed Move-In Inventory and Condition Record, along with baseline documentation and photographs established at commencement.</p>
      <p><strong>Unauthorized Alterations & Restoration:</strong> Any unauthorized alterations, paint color changes, wall modifications, or fixtures installed by Tenant must be restored to their original move-in condition at Tenant's expense prior to surrendering the Premises, normal wear and tear excluded.</p>
-     <p><strong>Surrender & Cleaning Standard:</strong> Tenant shall surrender the Premises upon move-out in the same level of cleanliness that existed at the inception of the tenancy, normal wear and tear excluded. All personal belongings, trash, and debris must be removed from the interior, garage, and outdoor areas. Flooring, countertops, appliances, and fixtures must be thoroughly cleaned to match initial move-in conditions.</p>
+     <p><strong>Surrender & Cleaning Standard:</strong> Tenant shall surrender the Premises upon move-out in the same level of cleanliness that existed at the inception of the tenancy, normal wear and tear excluded. All personal belongings, trash, and debris must be removed from the interior, garage, and outdoor areas. Flooring, countertops, appliances, and fixtures must be cleaned to the same level of cleanliness documented at move-in.</p>
      <p><strong>Security Deposit Deductions & Statutory Process (CA Civil Code § 1950.5):</strong> Pursuant to California Civil Code § 1950.5, Landlord may deduct from the Security Deposit only those amounts reasonably necessary to remedy defaults in rent, repair damage beyond normal wear and tear, or restore cleanliness to the level existing at the beginning of the tenancy. Landlord shall provide Tenant written notice of Tenant's statutory right to request an initial (pre-move-out) inspection within the final two weeks of tenancy to identify and remedy deficiencies prior to surrender. Within 21 calendar days after Tenant vacates, Landlord shall provide an itemized statement of any deductions along with any remaining balance and required receipts or documentation.</p>
 
      <p><strong>Default & Remedies:</strong> Failure to pay rent, utilities, or maintain terms (including pet and freeze protection rules) constitutes a material breach. Upon default, Landlord may issue statutory notices (e.g., 3-Day Notice to Pay or Quit / Perform Covenant) and pursue all legal and equitable remedies under California law, including possession, damages, and reasonable attorney fees where permitted by law.</p>
      <p><strong>Governing Law & Severability:</strong> Governed by the laws of the State of California. Venue shall be in the county where the property is located. If any provision is deemed invalid, all remaining terms remain in full effect.</p>
-  `;
+    <h2>6. Furnishings & Personal Property Addendum</h2>
+    <p>The Premises are leased fully furnished, including furniture, electronics, kitchenware (appliances, cookware, dishes, utensils), linens, and domestic supplies.</p>
+    <p><strong>Inventory Record:</strong> An itemized Inventory and Condition Record of all provided furnishings and supplies will be reviewed and signed by Tenant upon move-in.</p>
+    <p><strong>Care & Maintenance:</strong> Tenant agrees to maintain all furniture, housewares, and supplied items in good, clean, and operable condition. Tenant shall not remove any provided furnishings or supplies from the Premises.</p>
+    <p><strong>Loss & Damage:</strong> Normal wear and tear is expected; however, Tenant shall be financially responsible for replacing or repairing any missing items, stained/damaged upholstery, or broken kitchenware beyond standard wear. Deductions for missing or damaged personal property may be made from the Security Deposit pursuant to California Civil Code § 1950.5.</p>
+    <p><strong>Consumables:</strong> Landlord provides initial starter supplies (e.g., trash bags, paper products, soap). Tenant is responsible for replenishing all consumable goods for their own use during the lease term.</p>
+   `;
 
-  // Section numbers are based on state. The custom clauses are no longer a
-  // main section, so we use the base numbers directly.
-  const utilitySectionNumber = property.state === 'NV' ? 9 : 7;
-  const signaturesSectionNumber = property.state === 'NV' ? 10 : 8;
+   // Section numbers are based on state. The custom clauses are no longer a
+   // main section, so we use the base numbers directly.
+   const utilitySectionNumber = property.state === 'NV' ? 10 : 8;
+   const signaturesSectionNumber = property.state === 'NV' ? 11 : 9;
 
   // Utility companies based on location
   const utilityCompanies = property.city === 'Truckee' ? `
