@@ -9,11 +9,19 @@ function sanitizeFilename(str: string): string {
     .substring(0, 100);
 }
 
-/** Generate filename for PDF based on property address */
+/** Generate filename for PDF based on property address with timestamp */
 export function generatePDFFilename(lease: LeaseDocument): string {
   const address = lease.property.address || 'Unknown_Address';
   const sanitizedAddress = sanitizeFilename(address);
-  return `Lease_Agreement_${sanitizedAddress}.pdf`;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+  return `Lease_Agreement_${sanitizedAddress}_${timestamp}.pdf`;
 }
 
 export const generatePDF = async (lease: LeaseDocument, filename?: string): Promise<void> => {
