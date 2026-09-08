@@ -1,32 +1,50 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LeaseDocument, Signature, defaultDisclosureFlags } from '@/types/lease';
+import { LeaseDocument, Signature, OwnedProperty, Property, defaultDisclosureFlags } from '@/types/lease';
 import { storageService, formatRentSummary, formatLocalDate } from '@/lib/storage';
 import { downloadPDF, previewPDF } from '@/lib/pdfGenerator';
 import { generateProfessionalLeaseHTML } from '@/lib/html2pdfGenerator';
 import { getApplicableDisclosures } from '@/lib/stateRequirements';
+import { ownedPropertiesService } from '@/lib/ownedProperties';
 import LeaseForm from './LeaseForm';
 import SignatureCanvasComponent from './SignatureCanvas';
 import DocumentAttachments from './DocumentAttachments';
+import MoveInConditionChecklist from './MoveInConditionChecklist';
+import OwnedPropertiesManager from './OwnedPropertiesManager';
 
 export default function LeaseBuilder() {
   const [currentLease, setCurrentLease] = useState<LeaseDocument | null>(null);
-  const [view, setView] = useState<'form' | 'review' | 'sign' | 'dashboard'>('dashboard');
+  const [view, setView] = useState<'form' | 'review' | 'sign' | 'dashboard' | 'property-dashboard'>('dashboard');
+  const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
   const [savedLeases, setSavedLeases] = useState<LeaseDocument[]>([]);
+  const [ownedProperties, setOwnedProperties] = useState<OwnedProperty[]>([]);
+  const [showPropertiesManager, setShowPropertiesManager] = useState(false);
 
   const loadSavedLeases = () => {
     setSavedLeases(storageService.getAllLeases());
   };
 
+  const loadOwnedProperties = () => {
+    setOwnedProperties(ownedPropertiesService.getAll());
+  };
+
   useEffect(() => {
     loadSavedLeases();
+    loadOwnedProperties();
   }, []);
 
   const goToDashboard = () => {
     loadSavedLeases();
+    loadOwnedProperties();
     setCurrentLease(null);
+    setCurrentPropertyId(null);
     setView('dashboard');
+  };
+
+  const goToPropertyDashboard = (propertyId: string) => {
+    setCurrentPropertyId(propertyId);
+    setView('property-dashboard');
   };
 
   const handleSaveLease = (lease: LeaseDocument) => {
@@ -53,7 +71,6 @@ export default function LeaseBuilder() {
     if (currentLease) {
       const updatedSignatures = [...(currentLease.landlordSignatures || [])];
       updatedSignatures[landlordIndex] = signature;
-      
       const updatedLease = {
         ...currentLease,
         landlordSignatures: updatedSignatures,
@@ -68,7 +85,6 @@ export default function LeaseBuilder() {
     if (currentLease) {
       const updatedSignatures = [...(currentLease.tenantSignatures || [])];
       updatedSignatures[tenantIndex] = signature;
-      
       const updatedLease = {
         ...currentLease,
         tenantSignatures: updatedSignatures,
@@ -135,6 +151,78 @@ export default function LeaseBuilder() {
     setView('form');
   };
 
+  const handleMarkAllSignedOffsite = () => {
+    if (!currentLease) return;
+    const now = new Date().toISOString();
+    const landlordSignatures: Signature[] = currentLease.landlords.map((_, index) => ({
+      name: currentLease!.landlords[index].name,
+      signatureData: '',
+      date: now,
+      ipAddress: '',
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
+      method: 'offline_third_party' as const,
+    }));
+    const tenantSignatures: Signature[] = currentLease.tenants.map((_, index) => ({
+      name: currentLease!.tenants[index].name,
+      signatureData: '',
+      date: now,
+      ipAddress: '',
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
+      method: 'offline_third_party' as const,
+    }));
+    const updatedLease = {
+      ...currentLease,
+      landlordSignatures,
+      tenantSignatures,
+      updatedAt: now,
+    };
+    setCurrentLease(updatedLease);
+    storageService.saveLease(updatedLease);
+    setView('review');
+  };
+
+  const handlePropertiesChanged = (properties: OwnedProperty[]) => {
+    setOwnedProperties(properties);
+  };
+
+  const emptyPropertyForChecklist: Property = {
+    address: '',
+    city: '',
+    state: 'CA',
+    zipCode: '',
+    type: 'apartment',
+    disclosureFlags: {
+      inFloodHazardArea: false,
+      nearMilitaryOrdnance: false,
+      deathOnPropertyLast3Years: false,
+      knownMoldHazard: false,
+      pestControlContract: false,
+      sharedUtilityMeters: false,
+      subjectToForeclosure: false,
+      knownAsbestos: false,
+      demolitionPermitPending: false,
+      methContaminationHistory: false,
+      smokingPolicy: 'prohibited',
+      ab1482Exempt: false,
+    },
+  };
+
+  const getCurrentProperty = (): Property => {
+    if (!currentPropertyId) return emptyPropertyForChecklist;
+    return ownedPropertiesService.getById(currentPropertyId) || emptyPropertyForChecklist;
+  };
+
+  const leasesForCurrentProperty = currentPropertyId
+    ? savedLeases.filter(lease => {
+        if (!lease.property) return false;
+        const prop = ownedPropertiesService.getById(currentPropertyId);
+        if (!prop) return false;
+        const leaseKey = `${lease.property.address}|${lease.property.city}|${lease.property.state}|${lease.property.zipCode}`.toLowerCase().trim();
+        const propKey = `${prop.address}|${prop.city}|${prop.state}|${prop.zipCode}`.toLowerCase().trim();
+        return leaseKey === propKey;
+      })
+    : [];
+
   if (view === 'form') {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -167,10 +255,8 @@ export default function LeaseBuilder() {
           >
             ← Back to Review
           </button>
-          
           <div className="space-y-6">
             <h1 className="text-3xl font-bold text-gray-900">Sign Lease Agreement</h1>
-            
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
                 <strong>Property:</strong> {currentLease.property.address}, {currentLease.property.city}, {currentLease.property.state}
@@ -179,7 +265,31 @@ export default function LeaseBuilder() {
                 <strong>Rent:</strong> {formatRentSummary(currentLease.terms)}
               </p>
             </div>
-
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-5">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-5 w-5 text-blue-600 border-gray-300 rounded"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      if (confirm('Mark this lease as already signed by all parties via third-party app/offline?\n\nThis will mark all landlords and tenants as signed and return to the review page.')) {
+                        handleMarkAllSignedOffsite();
+                      } else {
+                        e.target.checked = false;
+                      }
+                    }
+                  }}
+                />
+                <div>
+                  <span className="text-base font-semibold text-gray-800 block">
+                    ✓ Mark all parties as already signed (offsite / via third-party app)
+                  </span>
+                  <span className="text-sm text-gray-600 block mt-1">
+                    Check this box if the lease was already signed outside this app (e.g., DocuSign, HelloSign, in person on a printed copy). All landlords and tenants will be marked as signed.
+                  </span>
+                </div>
+              </label>
+            </div>
             {currentLease.landlords.map((landlord, index) => (
               <SignatureCanvasComponent
                 key={`landlord-${index}`}
@@ -188,7 +298,6 @@ export default function LeaseBuilder() {
                 existingSignature={currentLease.landlordSignatures?.[index]}
               />
             ))}
-
             {currentLease.tenants.map((tenant, index) => (
               <SignatureCanvasComponent
                 key={`tenant-${index}`}
@@ -197,7 +306,6 @@ export default function LeaseBuilder() {
                 existingSignature={currentLease.tenantSignatures?.[index]}
               />
             ))}
-
             {currentLease.landlordSignatures && 
              currentLease.landlordSignatures.length === currentLease.landlords.length &&
              currentLease.landlordSignatures.every(sig => sig !== undefined) &&
@@ -222,7 +330,6 @@ export default function LeaseBuilder() {
     );
   }
 
-  // Review a specific lease
   if (view === 'review' && currentLease) {
     return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -246,323 +353,517 @@ export default function LeaseBuilder() {
             + New Lease
           </button>
         </div>
-
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {currentLease.property.address}
-                  </h2>
-                  <p className="text-gray-600">
-                    {currentLease.property.city}, {currentLease.property.state} {currentLease.property.zipCode}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleEditLease}
-                    className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteLease(currentLease.id)}
-                    className="px-3 py-1 bg-red-100 text-red-800 rounded hover:bg-red-200"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium text-gray-700">Landlord(s):</p>
-                  {currentLease.landlords.map((landlord, index) => (
-                    <div key={index} className="text-gray-600">
-                      <p>{landlord.name}</p>
-                      <p className="text-xs">{landlord.phone}</p>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">Tenant(s):</p>
-                  {currentLease.tenants.map((tenant, index) => (
-                    <div key={index} className="text-gray-600">
-                      <p>{tenant.name}</p>
-                      <p className="text-xs">{tenant.phone}</p>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">Term:</p>
-                  <p className="text-gray-600">
-                    {formatLocalDate(currentLease.terms.startDate)} - {formatLocalDate(currentLease.terms.endDate)}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">Rent:</p>
-                  <p className="text-gray-600">{formatRentSummary(currentLease.terms)}</p>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-3">
-                <button
-                  onClick={handleSignLease}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  {(currentLease.landlordSignatures && currentLease.landlordSignatures.some(sig => sig !== undefined)) || 
-                   (currentLease.tenantSignatures && currentLease.tenantSignatures.some(sig => sig !== undefined)) ? 'Update Signatures' : 'Sign Lease'}
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                >
-                  Download PDF
-                </button>
-                <button
-                  onClick={async () => {
-                    if (currentLease) {
-                      try {
-                        await previewPDF(currentLease);
-                      } catch (error) {
-                        alert('Error previewing PDF. Please try again.');
-                      }
-                    }
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Preview PDF
-                </button>
-                <button
-                  onClick={async () => {
-                    if (currentLease) {
-                      try {
-                        const htmlContent = generateProfessionalLeaseHTML(currentLease);
-                        const blob = new Blob([htmlContent], { type: 'text/html' });
-                        const url = URL.createObjectURL(blob);
-                        window.open(url, '_blank');
-                      } catch (error) {
-                        console.error('Error generating HTML preview:', error);
-                        alert('Error generating HTML preview. Please try again.');
-                      }
-                    }
-                  }}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                >
-                  Preview HTML
-                </button>
-              </div>
-
-              <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">
-                  <strong>Created:</strong> {new Date(currentLease.createdAt).toLocaleString()}
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {currentLease.property.address}
+                </h2>
+                <p className="text-gray-600">
+                  {currentLease.property.city}, {currentLease.property.state} {currentLease.property.zipCode}
                 </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Last Updated:</strong> {new Date(currentLease.updatedAt).toLocaleString()}
-                </p>
-                <div className="mt-2">
-                  <p className="text-sm font-medium text-gray-700">Signatures:</p>
-                  {currentLease.landlords.map((landlord, index) => (
-                    <p key={index} className="text-sm text-gray-600">
-                      Landlord {index + 1}: {currentLease.landlordSignatures?.[index] ? '✓ Signed' : 'Not signed'}
-                    </p>
-                  ))}
-                  {currentLease.tenants.map((tenant, index) => (
-                    <p key={index} className="text-sm text-gray-600">
-                      Tenant {index + 1}: {currentLease.tenantSignatures?.[index] ? '✓ Signed' : 'Not signed'}
-                    </p>
-                  ))}
-                </div>
               </div>
-
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-md">
-                <p className="text-sm font-medium text-blue-900 mb-2">
-                  Applicable disclosures ({currentLease.property.state})
-                </p>
-                <ul className="space-y-1">
-                  {getApplicableDisclosures({
-                    ...currentLease.property,
-                    disclosureFlags: {
-                      ...defaultDisclosureFlags(),
-                      ...(currentLease.property.disclosureFlags || {}),
-                    },
-                  }).map((d) => (
-                    <li key={d.id} className="text-sm text-blue-800">
-                      • {d.title}
-                      {d.statute ? ` — ${d.statute}` : ''}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <h3 className="text-base font-semibold text-green-900 mb-3">Utility Company Checklist</h3>
-                <p className="text-xs text-green-700 mb-3">Applicable for Reno NV and Truckee CA — verify contact info and set up accounts before move-in.</p>
-                
-                <div>
-                  <h4 className="text-sm font-bold text-green-800 mb-2">{currentLease?.property?.city === 'Truckee' ? 'Truckee, CA' : 'Reno, NV'}</h4>
-                  <ul className="text-sm text-green-800 space-y-2">
-                    {currentLease?.property?.city === 'Truckee' ? (
-                      <>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Tahoe Public Utility District (Electric)')} onChange={(e) => handleUtilityCheck('Tahoe Public Utility District (Electric)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Tahoe Public Utility District (Electric)</span>
-                            <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Truckee Donner PUD (Water)')} onChange={(e) => handleUtilityCheck('Truckee Donner PUD (Water)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Truckee Donner PUD (Water)</span>
-                            <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Southwest Gas (Gas)')} onChange={(e) => handleUtilityCheck('Southwest Gas (Gas)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Southwest Gas (Gas)</span>
-                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Tahoe Truckee Sierra Disposal (Trash)')} onChange={(e) => handleUtilityCheck('Tahoe Truckee Sierra Disposal (Trash)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Tahoe Truckee Sierra Disposal (Trash)</span>
-                            <p className="text-xs text-green-600">Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com</p>
-                          </div>
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('NV Energy (Electric & Gas)')} onChange={(e) => handleUtilityCheck('NV Energy (Electric & Gas)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">NV Energy (Electric & Gas)</span>
-                            <p className="text-xs text-green-600">Phone: (775) 834-4444 | www.nvenergy.com</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Truckee Meadows Water Authority (Water)')} onChange={(e) => handleUtilityCheck('Truckee Meadows Water Authority (Water)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Truckee Meadows Water Authority (Water)</span>
-                            <p className="text-xs text-green-600">Phone: (775) 834-8080 | www.tmwa.com</p>
-                          </div>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Waste Management (Trash)')} onChange={(e) => handleUtilityCheck('Waste Management (Trash)', e.target.checked)} />
-                          <div>
-                            <span className="font-medium">Waste Management (Trash)</span>
-                            <p className="text-xs text-green-600">Phone: (775) 329-8822 | www.wm.com</p>
-                          </div>
-                        </li>
-                      </>
-                    )}
-                  </ul>
-                </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleEditLease}
+                  className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteLease(currentLease.id)}
+                  className="px-3 py-1 bg-red-100 text-red-800 rounded hover:bg-red-200"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium text-gray-700">Landlord(s):</p>
+                {currentLease.landlords.map((landlord, index) => (
+                  <div key={index} className="text-gray-600">
+                    <p>{landlord.name}</p>
+                    <p className="text-xs">{landlord.phone}</p>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Tenant(s):</p>
+                {currentLease.tenants.map((tenant, index) => (
+                  <div key={index} className="text-gray-600">
+                    <p>{tenant.name}</p>
+                    <p className="text-xs">{tenant.phone}</p>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Term:</p>
+                <p className="text-gray-600">
+                  {formatLocalDate(currentLease.terms.startDate)} - {formatLocalDate(currentLease.terms.endDate)}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Rent:</p>
+                <p className="text-gray-600">{formatRentSummary(currentLease.terms)}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={handleSignLease}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                {(currentLease.landlordSignatures && currentLease.landlordSignatures.some(sig => sig !== undefined)) || 
+                 (currentLease.tenantSignatures && currentLease.tenantSignatures.some(sig => sig !== undefined)) ? 'Update Signatures' : 'Sign Lease'}
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Download PDF
+              </button>
+              <button
+                onClick={async () => {
+                  if (currentLease) {
+                    try {
+                      await previewPDF(currentLease);
+                    } catch (error) {
+                      alert('Error previewing PDF. Please try again.');
+                    }
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Preview PDF
+              </button>
+              <button
+                onClick={async () => {
+                  if (currentLease) {
+                    try {
+                      const htmlContent = generateProfessionalLeaseHTML(currentLease);
+                      const blob = new Blob([htmlContent], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                    } catch (error) {
+                      console.error('Error generating HTML preview:', error);
+                      alert('Error generating HTML preview. Please try again.');
+                    }
+                  }
+                }}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              >
+                Preview HTML
+              </button>
+            </div>
+            <div className="mt-4 p-4 bg-gray-50 rounded-md">
+              <p className="text-sm text-gray-600">
+                <strong>Created:</strong> {new Date(currentLease.createdAt).toLocaleString()}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Last Updated:</strong> {new Date(currentLease.updatedAt).toLocaleString()}
+              </p>
+              <div className="mt-2">
+                <p className="text-sm font-medium text-gray-700">Signatures:</p>
+                {currentLease.landlords.map((landlord, index) => {
+                  const signature = currentLease.landlordSignatures?.[index];
+                  if (!signature) return <p key={index} className="text-sm text-gray-600">Landlord {index + 1}: Not signed</p>;
+                  let statusText = '✓ Signed';
+                  if (signature.method === 'offline_third_party') {
+                    statusText = `✓ Signed (Third-party: ${signature.thirdPartyService || 'app'})`;
+                  }
+                  return <p key={index} className="text-sm text-gray-600">Landlord {index + 1}: {statusText}</p>;
+                })}
+                {currentLease.tenants.map((tenant, index) => {
+                  const signature = currentLease.tenantSignatures?.[index];
+                  if (!signature) return <p key={index} className="text-sm text-gray-600">Tenant {index + 1}: Not signed</p>;
+                  let statusText = '✓ Signed';
+                  if (signature.method === 'offline_third_party') {
+                    statusText = `✓ Signed (Third-party: ${signature.thirdPartyService || 'app'})`;
+                  }
+                  return <p key={index} className="text-sm text-gray-600">Tenant {index + 1}: {statusText}</p>;
+                })}
+              </div>
+            </div>
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-md">
+              <p className="text-sm font-medium text-blue-900 mb-2">
+                Applicable disclosures ({currentLease.property.state})
+              </p>
+              <ul className="space-y-1">
+                {getApplicableDisclosures({
+                  ...currentLease.property,
+                  disclosureFlags: {
+                    ...defaultDisclosureFlags(),
+                    ...(currentLease.property.disclosureFlags || {}),
+                  },
+                }).map((d) => (
+                  <li key={d.id} className="text-sm text-blue-800">
+                    • {d.title}
+                    {d.statute ? ` — ${d.statute}` : ''}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+              <h3 className="text-base font-semibold text-green-900 mb-3">Utility Company Checklist</h3>
+              <p className="text-xs text-green-700 mb-3">Applicable for Reno NV and Truckee CA — verify contact info and set up accounts before move-in.</p>
+              <div>
+                <h4 className="text-sm font-bold text-green-800 mb-2">{currentLease?.property?.city === 'Truckee' ? 'Truckee, CA' : 'Reno, NV'}</h4>
+                <ul className="text-sm text-green-800 space-y-2">
+                  {currentLease?.property?.city === 'Truckee' ? (
+                    <>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Tahoe Public Utility District (Electric)')} onChange={(e) => handleUtilityCheck('Tahoe Public Utility District (Electric)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">Tahoe Public Utility District (Electric)</span>
+                          <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Truckee Donner PUD (Water)')} onChange={(e) => handleUtilityCheck('Truckee Donner PUD (Water)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">Truckee Donner PUD (Water)</span>
+                          <p className="text-xs text-green-600">Phone: (530) 587-3896 | www.tdpud.org</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Southwest Gas (Gas)')} onChange={(e) => handleUtilityCheck('Southwest Gas (Gas)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">Southwest Gas (Gas)</span>
+                          <p className="text-xs text-green-600">Phone: (877) 860-6020 | www.swgas.com</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Tahoe Truckee Sierra Disposal (Trash)')} onChange={(e) => handleUtilityCheck('Tahoe Truckee Sierra Disposal (Trash)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">Tahoe Truckee Sierra Disposal (Trash)</span>
+                          <p className="text-xs text-green-600">Phone: (530) 583-7800 | www.tahoetruckeesierradisposal.com</p>
+                        </div>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('NV Energy (Electric & Gas)')} onChange={(e) => handleUtilityCheck('NV Energy (Electric & Gas)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">NV Energy (Electric & Gas)</span>
+                          <p className="text-xs text-green-600">Phone: (775) 834-4444 | www.nvenergy.com</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Truckee Meadows Water Authority (Water)')} onChange={(e) => handleUtilityCheck('Truckee Meadows Water Authority (Water)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">Truckee Meadows Water Authority (Water)</span>
+                          <p className="text-xs text-green-600">Phone: (775) 834-8080 | www.tmwa.com</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <input type="checkbox" className="mt-0.5" checked={currentLease?.terms?.checkedUtilities?.includes('Waste Management (Trash)')} onChange={(e) => handleUtilityCheck('Waste Management (Trash)', e.target.checked)} />
+                        <div>
+                          <span className="font-medium">Waste Management (Trash)</span>
+                          <p className="text-xs text-green-600">Phone: (775) 329-8822 | www.wm.com</p>
+                        </div>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            </div>
             <DocumentAttachments
               attachments={currentLease.attachments}
               onAttachmentsChange={handleAttachmentsChange}
             />
           </div>
+        </div>
       </div>
     </div>
     );
   }
 
-  // Dashboard — list of saved leases
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Lease Builder Dashboard</h1>
-          <button
-            type="button"
-            onClick={handleNewLease}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            + New Lease
-          </button>
+  // Property Dashboard — list saved leases for a specific property + move-in checklist
+  if (view === 'property-dashboard' && currentPropertyId) {
+    const property = ownedPropertiesService.getById(currentPropertyId);
+    if (!property) {
+      return (
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <button onClick={goToDashboard} className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
+              ← Back to Dashboard
+            </button>
+            <p className="text-gray-600">Property not found.</p>
+          </div>
         </div>
+      );
+    }
 
-        <div className="space-y-6">
-          {savedLeases.length > 0 ? (
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Saved Leases</h2>
-                <div className="space-y-3">
-                  {savedLeases.map((lease) => (
-                    <div
-                      key={lease.id}
-                      onClick={() => handleLoadLease(lease)}
-                      className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-gray-800">{lease.property.address}</p>
-                          <p className="text-sm text-gray-600">
-                            {lease.property.city}, {lease.property.state}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {lease.tenants.map(t => t.name).join(', ')} • {formatRentSummary(lease.terms)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">
-                            {new Date(lease.createdAt).toLocaleDateString()}
-                          </p>
-                          <div className="mt-1">
-                            {lease.landlordSignatures &&
-                             lease.landlordSignatures.length === lease.landlords.length &&
-                             lease.landlordSignatures.every(sig => sig !== undefined) &&
-                             lease.tenantSignatures &&
-                             lease.tenantSignatures.length === lease.tenants.length &&
-                             lease.tenantSignatures.every(sig => sig !== undefined) ? (
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                                Fully Signed
-                              </span>
-                            ) : (lease.landlordSignatures && lease.landlordSignatures.some(sig => sig !== undefined)) ||
-                                  (lease.tenantSignatures && lease.tenantSignatures.some(sig => sig !== undefined)) ? (
-                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                                Partially Signed
-                              </span>
-                            ) : (
-                              <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                                Not Signed
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <button
+              type="button"
+              onClick={goToDashboard}
+              className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
+            >
+              ← Back to Dashboard
+            </button>
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{property.label || property.address}</h1>
+                <p className="text-gray-600 mt-1">
+                  {property.address}, {property.city}, {property.state} {property.zipCode}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {property.type} {property.unitNumber ? `• Unit #${property.unitNumber}` : ''}
+                </p>
               </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No leases yet</h3>
-              <p className="text-gray-600 mb-4">Get started by creating your first lease agreement</p>
               <button
                 type="button"
                 onClick={handleNewLease}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
-                Create New Lease
+                + New Lease for This Property
               </button>
             </div>
-          )}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Saved Leases ({leasesForCurrentProperty.length})
+                </h2>
+                {leasesForCurrentProperty.length > 0 ? (
+                  <div className="space-y-3">
+                    {leasesForCurrentProperty.map((lease) => (
+                      <div
+                        key={lease.id}
+                        onClick={() => handleLoadLease(lease)}
+                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-800">
+                              {lease.tenants.map(t => t.name).join(', ')}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {formatLocalDate(lease.terms.startDate)} - {formatLocalDate(lease.terms.endDate)}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {formatRentSummary(lease.terms)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500">
+                              {new Date(lease.createdAt).toLocaleDateString()}
+                            </p>
+                            <div className="mt-1">
+                              {lease.landlordSignatures &&
+                               lease.landlordSignatures.length === lease.landlords.length &&
+                               lease.landlordSignatures.every(sig => sig !== undefined) &&
+                               lease.tenantSignatures &&
+                               lease.tenantSignatures.length === lease.tenants.length &&
+                               lease.tenantSignatures.every(sig => sig !== undefined) ? (
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                  Fully Signed
+                                </span>
+                              ) : (lease.landlordSignatures && lease.landlordSignatures.some(sig => sig !== undefined)) ||
+                                    (lease.tenantSignatures && lease.tenantSignatures.some(sig => sig !== undefined)) ? (
+                                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                                  Partially Signed
+                                </span>
+                              ) : (
+                                <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                  Not Signed
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No leases yet</h3>
+                    <p className="text-gray-600 mb-4">Create a lease agreement for this property</p>
+                    <button
+                      type="button"
+                      onClick={handleNewLease}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Create New Lease
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <MoveInConditionChecklist property={property} />
+            </div>
+          </div>
         </div>
+        {showPropertiesManager && (
+          <OwnedPropertiesManager
+            onClose={() => {
+              setShowPropertiesManager(false);
+              loadOwnedProperties();
+            }}
+            onChanged={handlePropertiesChanged}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Dashboard — tiles for each owned property
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Lease Builder Dashboard</h1>
+            <p className="text-gray-600 mt-1">Click on a property tile to view its leases and move-in checklist</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setShowPropertiesManager(true)}
+              className="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Manage Properties
+            </button>
+            <button
+              type="button"
+              onClick={handleNewLease}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              + New Lease
+            </button>
+          </div>
+        </div>
+
+        {ownedProperties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {ownedProperties.map((property) => {
+              const propertyLeases = savedLeases.filter(lease => {
+                if (!lease.property) return false;
+                const prop = ownedPropertiesService.getById(property.id);
+                if (!prop) return false;
+                const leaseKey = `${lease.property.address}|${lease.property.city}|${lease.property.state}|${lease.property.zipCode}`.toLowerCase().trim();
+                const propKey = `${prop.address}|${prop.city}|${prop.state}|${prop.zipCode}`.toLowerCase().trim();
+                return leaseKey === propKey;
+              });
+
+              const signedCount = propertyLeases.filter(lease =>
+                lease.landlordSignatures &&
+                lease.landlordSignatures.length === lease.landlords.length &&
+                lease.landlordSignatures.every(sig => sig !== undefined) &&
+                lease.tenantSignatures &&
+                lease.tenantSignatures.length === lease.tenants.length &&
+                lease.tenantSignatures.every(sig => sig !== undefined)
+              ).length;
+
+              return (
+                <div
+                  key={property.id}
+                  onClick={() => goToPropertyDashboard(property.id)}
+                  className="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-all border-2 border-transparent hover:border-blue-300 overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 truncate">
+                          {property.label || property.address}
+                        </h3>
+                        <p className="text-sm text-gray-600 truncate">
+                          {property.address}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {property.city}, {property.state} {property.zipCode}
+                        </p>
+                      </div>
+                      <span className="text-2xl">
+                        {property.type === 'house' ? '🏠' : 
+                         property.type === 'condo' ? '🏢' : 
+                         property.type === 'townhouse' ? '🏡' : 
+                         property.type === 'apartment' ? '🏢' : '📍'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                      <span className="flex items-center gap-1">
+                        <span className="font-medium text-gray-900">{propertyLeases.length}</span>
+                        lease{propertyLeases.length !== 1 ? 's' : ''}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                        {signedCount} signed
+                      </span>
+                    </div>
+
+                    {propertyLeases.length > 0 ? (
+                      <div className="space-y-2">
+                        {propertyLeases.slice(0, 2).map((lease) => (
+                          <div key={lease.id} className="text-xs bg-gray-50 rounded p-2">
+                            <p className="font-medium text-gray-700 truncate">
+                              {lease.tenants.map(t => t.name).join(', ')}
+                            </p>
+                            <p className="text-gray-500">
+                              {formatRentSummary(lease.terms)}
+                            </p>
+                          </div>
+                        ))}
+                        {propertyLeases.length > 2 && (
+                          <p className="text-xs text-blue-600 font-medium">
+                            +{propertyLeases.length - 2} more lease{propertyLeases.length - 2 !== 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-3 bg-gray-50 rounded">
+                        <p className="text-xs text-gray-500">No leases yet</p>
+                        <p className="text-xs text-blue-600 mt-1">Click to create one →</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <div className="text-gray-400 mb-4">
+              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10h1m4-10h1m-1 4h1m-1 4h1m-5 10h1m4-10h1m-1 4h1m-1 4h1m-5 10h1" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No properties yet</h3>
+            <p className="text-gray-600 mb-4">Add your properties to organize leases by location</p>
+            <button
+              type="button"
+              onClick={() => setShowPropertiesManager(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Add Your First Property
+            </button>
+          </div>
+        )}
+        {showPropertiesManager && (
+          <OwnedPropertiesManager
+            onClose={() => {
+              setShowPropertiesManager(false);
+              loadOwnedProperties();
+            }}
+            onChanged={handlePropertiesChanged}
+          />
+        )}
       </div>
     </div>
   );
