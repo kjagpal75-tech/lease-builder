@@ -575,6 +575,23 @@ export default function LeaseBuilder() {
               attachments={currentLease.attachments}
               onAttachmentsChange={handleAttachmentsChange}
             />
+            <div className="mt-6">
+              <MoveInConditionChecklist
+                property={currentLease.property}
+                initialData={currentLease.moveInChecklist}
+                onSave={(data) => {
+                  if (currentLease) {
+                    const updatedLease = {
+                      ...currentLease,
+                      moveInChecklist: data,
+                      updatedAt: new Date().toISOString(),
+                    };
+                    setCurrentLease(updatedLease);
+                    storageService.saveLease(updatedLease);
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

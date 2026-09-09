@@ -18,6 +18,7 @@ export default function SignatureCanvasComponent({
   const sigCanvas = useRef<SignatureCanvas>(null);
   const [isSigned, setIsSigned] = useState(!!existingSignature);
   const [name, setName] = useState(existingSignature?.name || '');
+  const [signedOffsite, setSignedOffsite] = useState(existingSignature?.method === 'offline_third_party');
 
   useEffect(() => {
     if (existingSignature && sigCanvas.current) {
@@ -31,18 +32,25 @@ export default function SignatureCanvasComponent({
   };
 
   const saveSignature = () => {
-    if (!sigCanvas.current || !name.trim()) {
-      alert('Please provide your name and sign the document');
+    if (!name.trim()) {
+      alert('Please provide your full legal name');
       return;
     }
 
-    const signatureData = sigCanvas.current.toDataURL();
+    // For digital signatures, require a drawn signature
+    if (!signedOffsite && (!sigCanvas.current || sigCanvas.current.isEmpty())) {
+      alert('Please sign the document in the box below');
+      return;
+    }
+
+    const signatureData = signedOffsite ? '' : (sigCanvas.current?.toDataURL() || '');
     const signature: Signature = {
       name: name.trim(),
       signatureData,
       date: new Date().toISOString(),
-      ipAddress: 'IP Logged', // In production, this would come from server
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'
+      ipAddress: signedOffsite ? '' : 'IP Logged',
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
+      method: signedOffsite ? 'offline_third_party' : 'digital',
     };
 
     onSignatureComplete(signature);
@@ -67,6 +75,18 @@ export default function SignatureCanvasComponent({
           placeholder="Enter your full legal name"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
         />
+      </div>
+
+      <div className="mb-4">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <input
+            type="checkbox"
+            checked={signedOffsite}
+            onChange={(e) => setSignedOffsite(e.target.checked)}
+            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+          />
+          <span>Already signed offsite / via third-party app (DocuSign, HelloSign, etc.)</span>
+        </label>
       </div>
 
       <div className="mb-4">

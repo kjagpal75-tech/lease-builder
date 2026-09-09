@@ -57,6 +57,7 @@ export function normalizeLeaseTerms(terms?: Partial<LeaseTerms>): LeaseTerms {
     utilitiesTenantResponsible: terms?.utilitiesTenantResponsible || [],
     utilitiesReimbursed: terms?.utilitiesReimbursed || [],
     utilityReimbursementAmounts: terms?.utilityReimbursementAmounts || {},
+    customClauses: terms?.customClauses || [],
   };
 }
 

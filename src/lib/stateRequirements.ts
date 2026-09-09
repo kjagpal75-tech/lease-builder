@@ -694,12 +694,14 @@ function stripDuplicateTitle(body: string, title: string, statute?: string): str
   return body;
 }
 
-export const formatDisclosuresForLease = (property: Property): string => {
+export const formatDisclosuresForLease = (property: Property, sectionNumber?: number): string => {
   const disclosures = getApplicableDisclosures(property);
   if (disclosures.length === 0) return '';
 
+  const num = sectionNumber ?? (property.state === 'CA' ? 6 : 8);
+
   return `
-        <h2>8. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
+        <h2>${num}. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
         <ol>
         ${disclosures.map((d) => {
           const title = `${d.title}${d.statute ? ` (${d.statute})` : ''}`;

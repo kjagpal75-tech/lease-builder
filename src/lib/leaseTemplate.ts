@@ -23,7 +23,10 @@ export const generateLeaseText = (lease: LeaseDocument): string => {
   };
 
   const stateClauses = getStateSpecificClauses(normalizedProperty.state);
-  const disclosuresSection = formatDisclosuresForLease(normalizedProperty);
+   // Use section 7 for CA disclosures (after Furnishings at 6, before Utility at 8)
+   // Use section 8 for NV disclosures (after Furnishings at 7, before Utility at 9)
+   const disclosureSectionNumber = property.state === 'CA' ? 7 : 8;
+  const disclosuresSection = formatDisclosuresForLease(normalizedProperty, disclosureSectionNumber);
 
   const landlordText = landlords.map((landlord, index) => 
     `LANDLORD${landlords.length > 1 ? ` ${index + 1}` : ''}: ${landlord.name}
@@ -93,6 +96,7 @@ ${
 The full Rent is due in advance on or before ${formatLocalDate(terms.prepaidDueDate || terms.startDate)}, and covers occupancy for the full term from ${formatLocalDate(terms.startDate)} through ${formatLocalDate(terms.endDate)}. No additional monthly rent installments are due during the term unless otherwise agreed in writing.
 ${terms.petsAllowed && terms.petRent && totalPetCount(terms) > 0 ? `The total Rent of $${(terms.totalRent ?? 0).toFixed(2)} consists of base rent $${((terms.totalRent ?? 0) - totalLeasePetRent(terms)).toFixed(2)} plus pet rent $${totalLeasePetRent(terms).toFixed(2)} ($${(terms.petRent || 0).toFixed(2)} per pet per month × ${totalPetCount(terms)} pet(s) over the lease term).` : ''}
 ${terms.monthlyRent > 0 ? `For reference and statutory deposit calculations, the monthly rent equivalent is $${terms.monthlyRent.toFixed(2)}.` : ''}
+${terms.holdingDeposit && terms.holdingDeposit > 0 ? `Holding Deposit of $${terms.holdingDeposit.toFixed(2)} applies toward this total upon move-in. The remaining balance due will be $${((terms.totalRent ?? 0) - terms.holdingDeposit).toFixed(2)} (pre-paid rent of $${(terms.totalRent ?? 0).toFixed(2)} minus holding deposit of $${terms.holdingDeposit.toFixed(2)}).` : ''}
 ${terms.lateFeePercent || terms.lateFee ? `Late Fee: ${terms.lateFeePercent ?? ''}% of the applicable rent${terms.lateFee ? ` ($${terms.lateFee.toFixed(2)})` : ''} if the prepaid Rent is not received by the due date above${property.state === 'NV' ? ', and not earlier than 3 calendar days after that due date (NRS 118A.210)' : ' (Civil Code § 1671 — reasonable late fee)'}.` : ''}`
     : `Tenant agrees to pay Landlord the sum of $${terms.monthlyRent.toFixed(2)} per month ("Rent").
 Rent is due on the ${terms.rentDueDay}${getOrdinalSuffix(terms.rentDueDay)} day of each month.
@@ -220,9 +224,26 @@ C. Severability: If any clause, provision, or statutory reference within this Le
 
 ${stateClauses.join('\n')}
 
-${disclosuresSection}
+${disclosureSectionNumber - 1}. FURNISHINGS & PERSONAL PROPERTY ADDENDUM
+The Premises are leased fully furnished, including furniture, electronics, kitchenware (appliances, cookware, dishes, utensils), linens, and domestic supplies.
+<strong>Inventory Record:</strong> An itemized Inventory and Condition Record of all provided furnishings and supplies will be reviewed and signed by Tenant upon move-in.
+<strong>Care & Maintenance:</strong> Tenant agrees to maintain all furniture, housewares, and supplied items in good, clean, and operable condition. Tenant shall not remove any provided furnishings or supplies from the Premises.
+<strong>Loss & Damage:</strong> Normal wear and tear is expected; however, Tenant shall be financially responsible for replacing or repairing any missing items, stained/damaged upholstery, or broken kitchenware beyond standard wear. Deductions for missing or damaged personal property may be made from the Security Deposit pursuant to California Civil Code § 1950.5.
+<strong>Consumables:</strong> Landlord provides initial starter supplies (e.g., trash bags, paper products, soap). Tenant is responsible for replenishing all consumable goods for their own use during the lease term.
+${property.state === 'CA' ? `<strong>Snow & Freeze Protection:</strong> Landlord-provided snow removal is strictly limited to seasonal driveway plowing. Tenant is responsible for clearing snow and ice from walkways, steps, entryways, and decks. Tenant agrees to maintain the property heating system at a minimum of 55°F at all times during the lease term to prevent freeze damage to plumbing.` : ''}
 
-ADDENDUM A — TENANT RESPONSIBILITIES AND RULES (PET-RELATED)
+  ${disclosuresSection}
+
+  ${terms.customClauses && terms.customClauses.length > 0 ? `
+  CUSTOM CLAUSE / PROVISION
+  __________________________
+  ${terms.customClauses.map((clause) => `
+  Section: ${clause.section}
+  ${clause.text}
+  `).join('\n')}
+  ` : ''}
+
+  ADDENDUM A — TENANT RESPONSIBILITIES AND RULES (PET-RELATED)
 __________________________
 
 This Addendum forms part of the Residential Lease Agreement between Landlord and Tenant. By signing the Lease, Tenant acknowledges and agrees to the following pet-related responsibilities and rules:

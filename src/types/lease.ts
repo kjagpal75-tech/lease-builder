@@ -39,7 +39,16 @@ export interface Property {
   /** Optional label for portfolio (e.g. "Lake Tahoe Cabin") */
   label?: string;
   county?: string;
+  mailboxNumber?: string;
   disclosureFlags: PropertyDisclosureFlags;
+  bedrooms?: number;
+  bathrooms?: number;
+  kitchen?: boolean;
+  garage?: boolean;
+  basement?: boolean;
+  fireplace?: boolean;
+  deck?: boolean;
+  pool?: boolean;
 }
 
 export interface OwnedProperty extends Property {
@@ -60,6 +69,12 @@ export interface LeasePet {
   count: number;
   breed?: string;
   age?: number;
+}
+
+export interface CustomClause {
+  id: string;
+  section: string;
+  text: string;
 }
 
 export interface LeaseTerms {
@@ -108,7 +123,16 @@ export interface LeaseTerms {
   utilityReimbursementAmounts?: Record<string, number>;
   /** Utilities checked by tenant/landlord for setup */
   checkedUtilities?: string[];
+  /** Custom clauses/provisions added by the user */
+  customClauses?: CustomClause[];
 }
+
+/** How the signature was collected */
+export type SignatureMethod = 
+  /** Signed digitally using the built-in signature canvas on this app */
+  | 'digital'
+  /** Signed offline/handwritten or via third-party service (DocuSign, HelloSign, etc.) */
+  | 'offline_third_party';
 
 export interface Signature {
   name: string;
@@ -116,6 +140,10 @@ export interface Signature {
   date: string;
   ipAddress: string;
   userAgent: string;
+  /** How the signature was collected */
+  method: SignatureMethod;
+  /** Name of third-party service if method is 'offline_third_party' */
+  thirdPartyService?: string;
 }
 
 export interface LandlordProfile {
@@ -142,6 +170,31 @@ export interface Attachment {
   title: string;
 }
 
+export interface MoveInChecklistItem {
+  id: string;
+  category: string;
+  item: string;
+  description: string;
+  checked: boolean;
+  attachments: Attachment[];
+}
+
+export interface MoveInChecklistData {
+  features: {
+    bedrooms: number;
+    bathrooms: number;
+    kitchen: boolean;
+    garage: boolean;
+    basement: boolean;
+    fireplace: boolean;
+    deck: boolean;
+    pool: boolean;
+  };
+  items: MoveInChecklistItem[];
+  explanations: Record<string, string>;
+  attachments: Attachment[];
+}
+
 export interface LeaseDocument {
   id: string;
   landlords: Party[];
@@ -153,6 +206,7 @@ export interface LeaseDocument {
   tenantSignatures?: Signature[];
   coSignerSignatures?: Signature[];
   attachments: Attachment[];
+  moveInChecklist?: MoveInChecklistData;
   createdAt: string;
   updatedAt: string;
 }
@@ -204,6 +258,7 @@ export const emptyProperty = (state: State = 'CA'): Property => ({
   city: '',
   state,
   zipCode: '',
+  mailboxNumber: '',
   type: 'apartment',
   disclosureFlags: defaultDisclosureFlags(),
 });
