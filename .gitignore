@@ -2,5 +2,5 @@
 .DS_Store
 .next/
 node_modules/
-tsconfig.tsbuildinfotmp/
 tsconfig.tsbuildinfo
+tmp/
