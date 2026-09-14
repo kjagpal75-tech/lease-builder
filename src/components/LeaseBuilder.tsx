@@ -721,9 +721,6 @@ export default function LeaseBuilder() {
                 )}
               </div>
             </div>
-            <div className="lg:col-span-1">
-              <MoveInConditionChecklist property={property} />
-            </div>
           </div>
         </div>
         {showPropertiesManager && (
