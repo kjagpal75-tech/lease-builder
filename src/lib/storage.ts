@@ -252,4 +252,31 @@ export const storageService = {
       console.error('Error clearing localStorage:', error);
     }
   },
+
+  exportLeases: (): string => {
+    if (typeof window === 'undefined') return '[]';
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data || '[]';
+    } catch (error) {
+      console.error('Error exporting leases:', error);
+      return '[]';
+    }
+  },
+
+  importLeases: (jsonString: string): { success: boolean; count: number; error?: string } => {
+    if (typeof window === 'undefined') return { success: false, count: 0, error: 'Not in browser environment' };
+    try {
+      const imported = JSON.parse(jsonString);
+      if (!Array.isArray(imported)) {
+        return { success: false, count: 0, error: 'Invalid format: expected array of leases' };
+      }
+      const normalized = imported.map(normalizeLease);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      return { success: true, count: normalized.length };
+    } catch (error) {
+      console.error('Error importing leases:', error);
+      return { success: false, count: 0, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  },
 };

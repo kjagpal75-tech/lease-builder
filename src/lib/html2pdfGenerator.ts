@@ -1,8 +1,7 @@
 import { LeaseDocument } from '@/types/lease';
 import { generateLeaseText } from './leaseTemplate';
 import { formatLocalDate } from './storage';
-import { getApplicableDisclosures, formatDisclosuresForLease } from './stateRequirements';
-import { defaultDisclosureFlags } from '@/types/lease';
+import { formatDisclosuresForLease } from './stateRequirements';
 
 export const generateLeaseHTML = (lease: LeaseDocument): string => {
   // Get the lease text
@@ -113,22 +112,9 @@ export const generateLeaseHTML = (lease: LeaseDocument): string => {
 
 export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   const { landlords, tenants, coSigners, property, terms } = lease;
-  const today = formatLocalDate(new Date().toISOString().slice(0, 10));
-  const start = terms.startDate ? formatLocalDate(terms.startDate) : '';
-  const end = terms.endDate ? formatLocalDate(terms.endDate) : '';
-
-   // Generate disclosures section
-   const normalizedPropertyForDisclosures = {
-     ...property,
-     disclosureFlags: {
-       ...defaultDisclosureFlags(),
-       ...(property.disclosureFlags || {}),
-     },
-   };
-   // Disclosures section number: CA=7 (after Furnishings at 6, before Utility at 8)
-   // NV=9 (after Furnishings at 8, before Utility at 10)
-   const disclosureSectionNumber = property.state === 'CA' ? 7 : 9;
-   const disclosuresSection = formatDisclosuresForLease(normalizedPropertyForDisclosures, disclosureSectionNumber);
+  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const start = terms.startDate ? new Date(terms.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+  const end = terms.endDate ? new Date(terms.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
 
   // Build landlord info with full details matching preview
   const landlordInfo = landlords.map((l, i) => `
@@ -161,27 +147,22 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <h2>4. Pet Policy Addendum</h2>
     <div class="highlight-box">
       <strong>Permitted Pets:</strong><br>
-      ${(terms.pets || []).map((pet, i) => `
-      &bull; <strong>Pet ${i + 1}:</strong> ${pet.type || 'N/A'} | ${pet.breed || 'N/A'} | Age: ${pet.age || 'N/A'}
-      `).join('')}
-      ${(terms.pets || []).length === 0 ? '<br>&bull; No pets specified' : ''}
-      ${(terms.pets || []).length < 2 && (terms.pets || []).length === 0 ? '<br>&bull; Pet 2: Type: N/A | Breed: N/A | Age: N/A' : ''}
-
-      ${terms.petDeposit ? `<br><strong>Refundable Pet Deposit:</strong> <strong>$${terms.petDeposit.toFixed(2)}</strong> (Held under ${property.state === 'NV' ? 'NRS 118A.242. The combined total of all deposits (security, key, pet) does not exceed the statutory limit of three (3) months\' rent.' : 'California Civil Code § 1950.5. The combined total of all deposits (security, key, pet) does not exceed the statutory limit.'})` : ''}
-      ${terms.petRent && terms.pets && terms.pets.length > 0 ? `<br><strong>Monthly Pet Rent:</strong> <strong>$${(terms.petRent * terms.pets.length).toFixed(2)}</strong> per month ($${terms.petRent.toFixed(2)} per pet × ${terms.pets.length} pet(s))` : ''}
+      ${terms.pets && terms.pets.length > 0 ? terms.pets.map((pet, i) => 
+        `&bull; <strong>Pet ${i + 1}:</strong> ${pet.type || 'N/A'} | ${pet.breed || 'N/A'} | Count: ${pet.count || 1} | Age: ${pet.age || 'N/A'}<br>`
+      ).join('') : 
+        '&bull; No pets specified'}
+      ${terms.petDeposit ? `<strong>Refundable Pet Deposit:</strong> <strong>$${terms.petDeposit.toFixed(2)}</strong> (Held under ${property.state === 'NV' ? 'NRS 118A.242. The combined total of all deposits (security, key, pet) does not exceed the statutory limit of three (3) months\' rent.' : 'California Civil Code § 1950.5. The combined total of all deposits (security, key, pet) does not exceed the statutory limit.'}).` : ''}
     </div>
     <h3>Tenant Pet Responsibilities & Rules</h3>
-    <ol>
-      <li><strong>Control & Sanitation:</strong> Must be leashed outdoors. Immediate waste disposal in trash receptacles required.</li>
-      <li><strong>Flooring Protection:</strong> Protective area rugs, runners, or mats must be placed in high-traffic pathways and pet resting areas to prevent wear, scratches, or staining on flooring (whether carpet, hardwood, or other surfaces). 100% waterproof mats required under food/water bowls and litter boxes.</li>
-      <li><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid or moisture can cause floor damage, staining, odor, or subfloor issues and constitutes damage beyond normal wear and tear.</li>
-      <li><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only manufacturer-approved, pH-neutral cleaners appropriate for the flooring type may be used (no harsh solvents, bleach, or abrasive scrubbers).</li>
-      <li><strong>Assistance Animals:</strong> ${property.state === 'NV'
-        ? 'Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.'
-        : 'Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.'}
-      </li>
-      <li><strong>Violations:</strong> Breach of pet policy allows issuance of ${property.state === 'NV' ? 'Nevada 5-Day Notice to Cure or Quit' : 'California 3-Day Notice to Perform Covenant or Quit'}, leading to formal eviction proceedings if uncured.</li>
-    </ol>
+    <p><strong>Control & Sanitation:</strong> Must be leashed outdoors. Immediate waste disposal in trash receptacles required.</p>
+    <p><strong>Flooring Protection:</strong> Premises features premium hard-surface wood-style flooring. Protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats required under food/water bowls and litter boxes.</p>
+    <p><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid causing floor warping/seam swelling constitutes damage beyond normal wear and tear.</p>
+    <p><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only pH-neutral hard-surface floor cleaners permitted (no harsh solvents/bleach).</p>
+    <p><strong>Assistance Animals:</strong> ${property.state === 'NV'
+      ? 'Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.'
+      : 'Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.'}
+    </p>
+    <p><strong>Violations:</strong> Breach of pet policy allows issuance of ${property.state === 'NV' ? 'Nevada 5-Day Notice to Cure or Quit' : 'California 3-Day Notice to Perform Covenant or Quit'}, leading to formal eviction proceedings if uncured.</p>
   ` : '';
 
   // Build signature table matching preview exactly - dynamic based on actual data
@@ -211,16 +192,11 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <h2>5. Lease Terms & Conditions</h2>
     <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
-      <p><strong>Cleaning Requirement:</strong> Tenant shall surrender the property in a "broom-clean" condition, with all personal belongings, trash, and debris removed from the home, garage, and yard. Flooring, countertops, appliances, and fixtures must be cleaned to the same level of cleanliness documented at move-in.</p>
-    <p><strong>Move-In/Move-Out Comparison:</strong> The physical condition of the property at move-out will be evaluated against the initial signed Inventory and Condition Record (referenced in Section 8.2).</p>
-    <p><strong>Unauthorized Alterations:</strong> Any unauthorized alterations, paint colors, wall modifications, or fixtures installed by Tenant must be restored to their original condition at Tenant's expense prior to surrender.</p>
-    <p><strong>Deductions for Cleaning & Repair:</strong> Pursuant to NRS 118A.242, Landlord reserves the right to deduct from the Security Deposit actual costs required for cleaning the unit to move-in standard or repairing damage beyond normal wear and tear.</p>
-    <p><strong>Move-Out Utility Disconnection & Continuation Requirement:</strong> Tenant shall maintain all required utility accounts (including electricity, gas, and water) active, fully paid, and in Tenant's name continuously through the final day of the Lease Term or physical surrender of keys to Landlord, whichever occurs later. Prohibited Early Disconnection: Tenant shall not request final meter readings, shut down service, or disconnect any utility prior to the Lease end date or key surrender without Landlord's express prior written consent. Tenant Liability for Early Shut-Off: If Tenant prematurely disconnects or turns off utility services resulting in service interruption, freezes, pipe bursts, system damage, or utility company reconnect fees, Tenant shall be fully liable for all actual repair costs, property damages, utility reconnect charges, and any service restore fees incurred by Landlord. Landlord reserves the right to deduct such costs directly from the Security Deposit pursuant to NRS 118A.242.</p>
     <h2>6. Default and Remedies</h2>
     <div class="card">
       <h3>A. Event of Default</h3>
       <p>Tenant shall be deemed in material default of this Lease Agreement if: 1) Tenant fails to pay Rent, utility reimbursements, or any other financial obligation within the timelines specified herein; or 2) Tenant, authorized occupants, or guests violate any material covenant, condition, or rule of this Lease Agreement, including the attached Pet Policy Addendum.</p>
-
+      
       <h3>B. Landlord's Remedies</h3>
       <p>Upon the occurrence of an Event of Default, Landlord may pursue all legal and equitable remedies available to recover physical possession of the premises and documented actual damages. In accordance with Nevada summary eviction proceedings, Landlord's remedies are governed by the following strict statutory notice tracks:</p>
       <ul>
@@ -228,7 +204,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <li><strong>Curable Lease Violations:</strong> For non-monetary breaches, Landlord shall serve a written 5-Day Notice to Perform Lease Condition or Quit pursuant to NRS 40.2516.</li>
         <li><strong>Non-Curable Violations:</strong> For severe structural property waste, illegal activity, or recurring nuisances, Landlord shall serve a written 3-Day Notice to Quit pursuant to NRS 40.2514.</li>
       </ul>
-
+      
       <h3>C. Attorney's Fees</h3>
       <p>In compliance with NRS 118A.220(1)(c), if either party brings a formal legal action to enforce or interpret the terms of this Lease Agreement, the court may award reasonable attorney's fees and actual litigation costs strictly to the prevailing party.</p>
     </div>
@@ -237,66 +213,49 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <div class="card">
       <h3>A. Choice of Law</h3>
       <p>This Lease Agreement, along with all incorporated addendums, disclosures, and subsequent modifications, shall be governed by, construed, and enforced strictly in accordance with the laws of the State of Nevada.</p>
-
+      
       <h3>B. Venue Selection</h3>
       <p>Any judicial or summary eviction dispute arising directly under this lease framework shall be subject to the exclusive jurisdiction of the Justice Court in the specific county where the rental property is physically located.</p>
-
+      
       <h3>C. Severability</h3>
       <p>If any clause, provision, or statutory reference within this Lease is found to be void, illegal, or legally unenforceable under Nevada law (including NRS Chapter 118A), such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remainder of the Lease shall remain in full force and effect.</p>
     </div>
 
-    <h2>8. Furnishings & Personal Property Addendum</h2>
-    <ul style="margin-top: 2px; margin-bottom: 8px; padding-left: 20px; font-size: 9.5pt; color: #2d3748; line-height: 1.45;">
-      <li>The Premises are leased fully furnished, including furniture, electronics, kitchenware (appliances, cookware, dishes, utensils), linens, and domestic supplies.</li>
-      <li>Inventory Record: An itemized Inventory and Condition Record of all provided furnishings and supplies will be reviewed and signed by Tenant upon move-in.</li>
-      <li>Care & Maintenance: Tenant agrees to maintain all furniture, housewares, and supplied items in good, clean, and operable condition. Tenant shall not remove any provided furnishings or supplies from the Premises.</li>
-      <li>Loss & Damage: Normal wear and tear is expected; however, Tenant shall be financially responsible for replacing or repairing any missing items, stained/damaged upholstery, or broken kitchenware beyond standard wear. Deductions for missing or damaged personal property may be made from the Security Deposit pursuant to California Civil Code § 1950.5.</li>
-      <li>Consumables: Landlord provides initial starter supplies (e.g., trash bags, paper products, soap). Tenant is responsible for replenishing all consumable goods for their own use during the lease term.</li>
+    <h2>8. Nevada Specific Provisions & Required Disclosures</h2>
+    <ul>
+      <li><strong>NRS Chapter 118A Compliance:</strong> Complies fully with Nevada landlord-tenant laws. Free copy of signed lease and inventory/condition record provided.</li>
+      <li><strong>Nuisance Provision (NRS 202.470 / 118A.200):</strong> Nuisance/disturbances strictly prohibited (misdemeanor under NV law). Reports can be submitted to Landlord in writing.</li>
+      <li><strong>Emergency Contact & Flag Display:</strong> Landlord provides local emergency contact info within 60 miles (NRS 118A.260). Tenants retain right to display US Flag per NRS 118A.325.</li>
+      <li><strong>Foreclosure Disclosure (NRS 118A.275):</strong> Landlord discloses property is NOT currently subject to foreclosure proceedings.</li>
     </ul>
-
   ` : `
-<h2>5. Lease Terms & Conditions</h2>
-     <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
-     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
-     ${property.state === 'CA' ? `<p><strong>Snow & Freeze Protection:</strong> Landlord-provided snow removal is strictly limited to seasonal driveway plowing. Tenant is responsible for clearing snow and ice from walkways, steps, entryways, and decks. Tenant agrees to maintain the property heating system at a minimum of 55°F at all times during the lease term to prevent freeze damage to plumbing.</p>` : ''}
-     <p><strong>Landlord Repairs, Habitability & Early Termination:</strong> Landlord agrees to maintain essential services (heating, water, hot water, electricity, and structural integrity) in compliance with California habitability standards (Cal. Civ. Code § 1941.1). Tenant shall promptly notify Landlord in writing of any material defect or failure of essential services.</p>
-      <p>If the Property becomes materially uninhabitable or cannot reasonably be occupied due to a major property or utility issue through no fault of the Tenants, Rent shall be prorated for the affected period and any prepaid rent for unused days shall be refunded.</p>
-      <p>If such issue cannot reasonably be resolved within fourteen (14) calendar days from Landlord's receipt of written notice, either party may terminate this Lease without penalty, and all prepaid rent for the remaining period, along with the Security Deposit (less legal deductions), shall be refunded pursuant to CA Civil Code § 1950.5.</p>
-      <p>Provided, however, that the 14-day termination option shall be extended if Landlord has commenced diligent, good-faith efforts to cure or replace necessary equipment, and delay is caused solely by local utility outages, severe winter weather events preventing service access, or documented supply chain delays beyond Landlord's control, so long as Landlord provides temporary reasonable accommodations or alternative solutions where feasible.</p>
-     <p><strong>Move-In/Move-Out Inspection & Baseline:</strong> The physical condition and cleanliness of the Premises at move-out will be evaluated against the initial signed Move-In Inventory and Condition Record, along with baseline documentation and photographs established at commencement.</p>
-     <p><strong>Unauthorized Alterations & Restoration:</strong> Any unauthorized alterations, paint color changes, wall modifications, or fixtures installed by Tenant must be restored to their original move-in condition at Tenant's expense prior to surrendering the Premises, normal wear and tear excluded.</p>
-     <p><strong>Surrender & Cleaning Standard:</strong> Tenant shall surrender the Premises upon move-out in the same level of cleanliness that existed at the inception of the tenancy, normal wear and tear excluded. All personal belongings, trash, and debris must be removed from the interior, garage, and outdoor areas. Flooring, countertops, appliances, and fixtures must be cleaned to the same level of cleanliness documented at move-in.</p>
-     <p><strong>Security Deposit Deductions & Statutory Process (CA Civil Code § 1950.5):</strong> Pursuant to California Civil Code § 1950.5, Landlord may deduct from the Security Deposit only those amounts reasonably necessary to remedy defaults in rent, repair damage beyond normal wear and tear, or restore cleanliness to the level existing at the beginning of the tenancy. Landlord shall provide Tenant written notice of Tenant's statutory right to request an initial (pre-move-out) inspection within the final two weeks of tenancy to identify and remedy deficiencies prior to surrender. Within 21 calendar days after Tenant vacates, Landlord shall provide an itemized statement of any deductions along with any remaining balance and required receipts or documentation.</p>
-
-     <p><strong>Default & Remedies:</strong> Failure to pay rent, utilities, or maintain terms (including pet and freeze protection rules) constitutes a material breach. Upon default, Landlord may issue statutory notices (e.g., 3-Day Notice to Pay or Quit / Perform Covenant) and pursue all legal and equitable remedies under California law, including possession, damages, and reasonable attorney fees where permitted by law.</p>
-     <p><strong>Governing Law & Severability:</strong> Governed by the laws of the State of California. Venue shall be in the county where the property is located. If any provision is deemed invalid, all remaining terms remain in full effect.</p>
-    <h2>6. Furnishings & Personal Property Addendum</h2>
-    <p>The Premises are leased fully furnished, including furniture, electronics, kitchenware (appliances, cookware, dishes, utensils), linens, and domestic supplies.</p>
-    <p><strong>Inventory Record:</strong> An itemized Inventory and Condition Record of all provided furnishings and supplies will be reviewed and signed by Tenant upon move-in.</p>
-    <p><strong>Care & Maintenance:</strong> Tenant agrees to maintain all furniture, housewares, and supplied items in good, clean, and operable condition. Tenant shall not remove any provided furnishings or supplies from the Premises.</p>
-    <p><strong>Loss & Damage:</strong> Normal wear and tear is expected; however, Tenant shall be financially responsible for replacing or repairing any missing items, stained/damaged upholstery, or broken kitchenware beyond standard wear. Deductions for missing or damaged personal property may be made from the Security Deposit pursuant to California Civil Code § 1950.5.</p>
-    <p><strong>Consumables:</strong> Landlord provides initial starter supplies (e.g., trash bags, paper products, soap). Tenant is responsible for replenishing all consumable goods for their own use during the lease term.</p>
-   `;
-
-   // Section numbers are based on state. The custom clauses are no longer a
-   // main section, so we use the base numbers directly.
-   const utilitySectionNumber = property.state === 'NV' ? 10 : 8;
-   const signaturesSectionNumber = property.state === 'NV' ? 11 : 9;
+    <h2>5. Lease Terms & Conditions</h2>
+    <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
+    <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
+    ${property.state === 'CA' ? `
+    <p><strong>Move-In/Move-Out Inspection & Baseline:</strong> The physical condition and cleanliness of the Premises at move-out will be evaluated against the initial signed Move-In Inventory and Condition Record, along with baseline documentation and photographs established at commencement.</p>
+    <p><strong>Unauthorized Alterations & Restoration:</strong> Any unauthorized alterations, paint color changes, wall modifications, or fixtures installed by Tenant must be restored to their original move-in condition at Tenant's expense prior to surrendering the Premises, normal wear and tear excluded.</p>
+    <p><strong>Surrender & Cleaning Standard:</strong> Tenant shall surrender the Premises upon move-out in the same level of cleanliness that existed at the inception of the tenancy, normal wear and tear excluded. All personal belongings, trash, and debris must be removed from the interior, garage, and outdoor areas. Flooring, countertops, appliances, and fixtures must be cleaned to the same level of cleanliness documented at move-in.</p>
+    <p><strong>Security Deposit Deductions & Statutory Process (CA Civil Code § 1950.5):</strong> Pursuant to California Civil Code § 1950.5, Landlord may deduct from the Security Deposit only those amounts reasonably necessary to remedy defaults in rent, repair damage beyond normal wear and tear, or restore cleanliness to the level existing at the beginning of the tenancy. Landlord shall provide Tenant written notice of Tenant's statutory right to request an initial (pre-move-out) inspection within the final two weeks of tenancy to identify and remedy deficiencies prior to surrender. Within 21 calendar days after Tenant vacates, Landlord shall provide an itemized statement of any deductions along with any remaining balance and required receipts or documentation.</p>
+    <p><strong>Default & Remedies:</strong> Failure to pay rent, utilities, or maintain terms (including pet rules) constitutes a material breach. Upon default, Landlord may issue statutory notices (e.g., 3-Day Notice to Pay or Quit / Perform Covenant) and pursue all legal and equitable remedies under California law, including possession, damages, and reasonable attorney fees where permitted by law.</p>
+    <p><strong>Governing Law & Severability:</strong> Governed by the laws of the State of California. Venue shall be in the county where the property is located. If any provision is deemed invalid, all remaining terms remain in full effect.</p>
+    ` : `
+    <p><strong>Default & Governing Law:</strong> Default allows landlord full legal remedies under ${property.state === 'CA' ? 'California' : 'Nevada'} law. Governed by State of ${property.state === 'CA' ? 'California' : 'Nevada'} statutes.</p>
+    `}
+  `;
 
   // Utility companies based on location
-  const utilityCompanies = property.city === 'Truckee' ? `
-    <tr><th>Electric & Water</th><td>Truckee Donner PUD (TDPUD) &bull; (530) 587-3896 | www.tdpud.org</td></tr>
-    <tr><th>Gas</th><td>Southwest Gas &bull; (877) 860-6020 | www.swgas.com</td></tr>
-    <tr><th>Trash</th><td>Tahoe Truckee Sierra Disposal &bull; (530) 583-7800 | www.tahoetruckeesierradisposal.com</td></tr>
-    <tr><th>Internet</th><td>Spectrum / AT&T &bull; Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</td></tr>
+  const utilityCompanies = property.city === 'Fremont' ? `
+    <tr><th>Electricity & Gas</th><td>Pacific Gas and Electric Company (PG&E)</td></tr>
+    <tr><th>Water</th><td>Alameda County Water District (ACWD)</td></tr>
+    <tr><th>Trash & Recycling</th><td>Republic Services (Fremont)</td></tr>
   ` : `
     <tr><th>NV Energy (Electric & Gas)</th><td>(775) 834-4444 &bull; www.nvenergy.com</td></tr>
     <tr><th>Truckee Meadows Water Authority</th><td>(775) 834-8080 &bull; www.tmwa.com</td></tr>
     <tr><th>Waste Management (Trash)</th><td>(775) 329-8822 &bull; www.wm.com</td></tr>
-    <tr><th>Spectrum / AT&T (Internet)</th><td>Spectrum: (833) 267-6094 | AT&T: (800) 288-2020</td></tr>
   `;
 
-  const utilityLocation = property.city === 'Truckee' ? 'Truckee, CA' : 'Reno, NV';
+  const utilityLocation = property.city === 'Fremont' ? 'Fremont, CA' : 'Reno, NV';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -554,7 +513,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <div class="header">
             <h1>Residential Lease Agreement</h1>
-            <div class="subtitle">State of ${property.state}</div>
+            <div class="subtitle">State of ${property.state} &bull; Effective Date: ${today}</div>
         </div>
 
         <table class="grid-2">
@@ -584,18 +543,12 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <table class="table-summary">
             <tr>
                 <th>Property Address</th>
-                <td>${property.address}, ${property.city}, ${property.state} ${property.zipCode}</td>
+                <td>${property.address}</td>
             </tr>
             <tr>
                 <th>Property Type</th>
                 <td>${property.type}</td>
             </tr>
-            ${property.mailboxNumber ? `
-            <tr>
-                <th>Mailbox Assignment</th>
-                <td>USPS Cluster Box Unit #[${property.mailboxNumber}]. Tenant provided keys at move-in.</td>
-            </tr>
-            ` : ''}
             <tr>
                 <th>Lease Term</th>
                 <td><strong>${start}</strong> to <strong>${end}</strong></td>
@@ -604,98 +557,66 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <h2>2. Financial Terms: Rent & Security Deposit</h2>
         <table class="table-summary">
-
             <tr>
-                <th>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? 'Pre-paid Rent' : 'Monthly Rent'}</th>
-                <td><strong>$${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; const reimbAmounts = terms.utilityReimbursementAmounts || {}; const reimbUtilities = terms.utilitiesReimbursed || []; const utilityReimbTotal = reimbUtilities.reduce((sum, u) => sum + (reimbAmounts[u] || 0), 0); const totalPrepaidRent = ((terms.monthlyRent || 0) * months) + ((terms.petRent || 0) * numPets * months) + (utilityReimbTotal * months); return totalPrepaidRent.toFixed(2); })() : ((terms.monthlyRent || 0) + (terms.utilitiesReimbursed || []).reduce((sum, u) => sum + ((terms.utilityReimbursementAmounts || {})[u] || 0), 0)).toFixed(2)}</strong>${(terms.paymentSchedule || 'monthly') === 'prepaid' ? (() => { const months = Math.floor((new Date(terms.endDate || '').getTime() - new Date(terms.startDate || '').getTime()) / (1000 * 60 * 60 * 24) / 30); const numPets = (terms.pets || []).length; const reimbAmounts = terms.utilityReimbursementAmounts || {}; const reimbUtilities = terms.utilitiesReimbursed || []; const utilityReimbTotal = reimbUtilities.reduce((sum, u) => sum + (reimbAmounts[u] || 0), 0); const totalPrepaidRent = ((terms.monthlyRent || 0) * months) + ((terms.petRent || 0) * numPets * months) + (utilityReimbTotal * months); return ` total (monthly rent $${terms.monthlyRent?.toFixed(2) || '0.00'} × ${months} months = $${((terms.monthlyRent || 0) * months).toFixed(2)}${numPets > 0 && terms.petRent ? ` + pet rent $${terms.petRent?.toFixed(2) || '0.00'} × ${numPets} pets × ${months} months = $${((terms.petRent || 0) * numPets * months).toFixed(2)}` : ''}${utilityReimbTotal > 0 ? ` + utility reimbursement $${utilityReimbTotal.toFixed(2)} × ${months} months = $${(utilityReimbTotal * months).toFixed(2)}` : ''}${terms.holdingDeposit ? `. Holding Deposit of $${terms.holdingDeposit.toFixed(2)} applies toward this total upon move-in. The remaining balance due will be $${(totalPrepaidRent - terms.holdingDeposit).toFixed(2)} (pre-paid rent of $${totalPrepaidRent.toFixed(2)} minus holding deposit of $${terms.holdingDeposit.toFixed(2)}).` : ''})`; })() : ` per month (base rent $${terms.monthlyRent?.toFixed(2) || '0.00'}${(terms.utilitiesReimbursed || []).length > 0 ? ` + utility reimbursement $${(terms.utilitiesReimbursed || []).reduce((sum, u) => sum + ((terms.utilityReimbursementAmounts || {})[u] || 0), 0).toFixed(2)}` : ''}), due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.`}</td>
+                <th>Monthly Rent</th>
+                <td><strong>$${terms.monthlyRent?.toFixed(2) || '0.00'}</strong> per month, due on the ${terms.rentDueDay || 1}${terms.rentDueDay === 1 ? 'st' : terms.rentDueDay === 2 ? 'nd' : terms.rentDueDay === 3 ? 'rd' : 'th'} day of each month.</td>
             </tr>
             <tr>
                 <th>Security Deposit</th>
-                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (Returned within ${property.state === 'CA' ? '21 calendar days' : '30 days'} of move-out per ${property.state === 'CA' ? 'CA Civil Code § 1950.5' : 'NV law'}, less legal deductions).</td>
+                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (${property.state === 'CA' ? 'Returned within 21 calendar days of move-out per CA Civil Code § 1950.5, less legal deductions.' : 'Returned within 30 days of move-out per NV law, less legal deductions.'})</td>
             </tr>
-            ${terms.petDeposit ? `
-            <tr>
-                <th>Pet Deposit</th>
-                <td><strong>$${terms.petDeposit.toFixed(2)}</strong> (Refundable; governed by ${property.state === 'NV' ? 'NRS 118A.242' : 'CA Civil Code § 1950.5'} and subject to Pet Policy terms).</td>
-            </tr>
-            <tr>
-                <th>Total Combined Deposits Held</th>
-                <td><strong>$${((terms.securityDeposit || 0) + (terms.petDeposit || 0)).toFixed(2)}</strong> (${property.state === 'NV' ? 'Complies with NRS 118A.242 statutory limit of 3 months\' rent' : 'Subject to CA Civil Code § 1950.5 limits'}).</td>
-            </tr>
-            ` : ''}
             <tr>
                 <th>Late Fee</th>
-                <td><strong>${property.state === 'CA' ? 'Reasonable fee, up to 5% of periodic rent' : '5% of periodic rent'} ($${(terms.monthlyRent ? terms.monthlyRent * 0.05 : 0).toFixed(2)})</strong>, ${property.state === 'CA' ? 'representing a reasonable pre-estimate of administrative costs (CA Civil Code § 1671).' : 'imposed after at least 3 calendar days grace period (NRS 118A.210). Non-compounding.'}</td>
+                <td><strong>5% of periodic rent ($${(terms.monthlyRent ? terms.monthlyRent * 0.05 : 0).toFixed(2)})</strong>, ${property.state === 'CA' ? 'representing a reasonable pre-estimate of administrative costs (CA Civil Code § 1671). Non-compounding.' : 'imposed after at least 3 calendar days grace period (NRS 118A.210). Non-compounding.'}</td>
             </tr>
             <tr>
                 <th>Returned Check Fee</th>
-                <td><strong>$${property.state === 'CA' ? (terms.returnedCheckFeeSubsequent ? `${terms.returnedCheckFee?.toFixed(2) || '25.00'} first / $${terms.returnedCheckFeeSubsequent.toFixed(2)} subsequent` : `${terms.returnedCheckFee?.toFixed(2) || '25.00'} first / $35 subsequent`) : (terms.returnedCheckFee?.toFixed(2) || '25.00')}</strong> for any check returned unpaid / dishonored (${property.state === 'CA' ? 'CA Civil Code § 1719' : 'NRS 118A.200'}).</td>
+                <td><strong>$${terms.returnedCheckFee?.toFixed(2) || '25.00'}</strong> for any check returned unpaid / dishonored (${property.state === 'CA' ? 'CA Civil Code § 1719' : 'NRS 118A.200'}).</td>
             </tr>
-            ${terms.holdingDeposit ? `
-            <tr>
-                <th>Holding / Reservation Deposit</th>
-                <td><strong>$${terms.holdingDeposit.toFixed(2)}</strong> due on or before ______________________ to secure the tenancy and remove the property from the market. Upon move-in and fulfillment of all initial lease terms, this deposit will be credited toward Rent due under this Lease. If Tenant cancels or fails to take occupancy, Landlord may deduct actual damages (prorated rent for time held off-market and re-listing costs) and return any remaining balance within 14 days.</td>
-            </tr>
-            ` : ''}
         </table>
 
         <h2>3. Occupants & Utilities</h2>
-        <table class="table-summary">
-            <tr>
-                <th>Authorized Tenants and Occupants</th>
-                <td>${[...tenants.map(t => t.name), ...(terms.occupants || [])].join(', ') || 'None'}</td>
-            </tr>
-            <tr>
-                <th>Residency Restrictions</th>
-                <td>${property.state === 'CA' ? 'Only named signing Tenants and Occupants are permitted to reside on the premises. Guest stays exceeding 7 consecutive days or 14 total days in any 6-month period require Landlord\'s prior written approval.' : 'Only named signing Tenants and Occupants are permitted to reside on the premises. Guest stays exceeding 14 consecutive days require Landlord\'s prior written approval.'}</td>
-            </tr>
-        </table>
-
+        <p><strong>Authorized Occupants:</strong> ${tenants.map(t => t.name).join(', ')}.</p>
+        ${property.state === 'CA' ? `<p><strong>Residency Restrictions:</strong> Only named signing Tenants and Occupants are permitted to reside on the premises. Guest stays exceeding 7 consecutive days or 14 total days in any 6-month period require Landlord's prior written approval.</p>` : ''}
         <table class="table-summary">
             <tr>
                 <th>Tenant Direct Responsibility</th>
-                <td>${(terms.utilitiesTenantResponsible || []).filter(u => !terms.utilitiesReimbursed || !terms.utilitiesReimbursed.includes(u)).length > 0 ? (terms.utilitiesTenantResponsible || []).filter(u => !terms.utilitiesReimbursed || !terms.utilitiesReimbursed.includes(u)).join(', ') : 'None'}</td>
+                <td>${property.state === 'CA' ? 'Water, Garbage/Trash, Electricity, Gas, Cable TV' : 'Water, Garbage, Electricity, Gas, Internet, Cable TV'}</td>
             </tr>
-            ${(terms.utilitiesReimbursed || []).length > 0 ? `<tr>
-                <th>Landlord Paid & Tenant Reimbursed</th>
-                <td>${(terms.utilitiesReimbursed || []).map(u => {
-                    const amount = terms.utilityReimbursementAmounts?.[u];
-                    return `<strong>${u}${amount ? ` ($${amount.toFixed(2)}/month)` : ''}</strong>`;
-                }).join(', ')} — Added to monthly rent; remains in Landlord's account.</td>
-            </tr>` : ''}
-            ${(terms.utilitiesIncluded || []).length > 0 ? `
+            ${terms.utilitiesReimbursed && terms.utilitiesReimbursed.includes('sewer') && terms.utilityReimbursementAmounts?.sewer ? `
             <tr>
-                <th>Included in Rent (No Charge)</th>
-                <td>${terms.utilitiesIncluded.join(', ')}</td>
+                <th>Landlord Paid & Tenant Reimbursed</th>
+                <td><strong>Sewer ($${terms.utilityReimbursementAmounts.sewer.toFixed(2)}/month)</strong> — Added to monthly rent; remains in Landlord's account.</td>
             </tr>
             ` : ''}
+            <tr>
+                <th>Included in Rent (No Charge)</th>
+                <td>None</td>
+            </tr>
         </table>
-
-        <p><strong>Tenant Utility Responsibility:</strong> Tenant shall be solely responsible for selecting, connecting, and paying for all utility services serving the Premises during the lease term, except as explicitly provided herein. Tenant agrees to transfer and establish all required utility accounts directly in Tenant’s name effective on or before the first day of the Lease Term (Move-In Date). Tenant shall be responsible for all account setup fees, transfer charges, and monthly billing incurred for utility accounts established in Tenant’s name during the Lease Term. If Tenant fails to transfer required utilities to Tenant’s name by the Move-In Date, Tenant shall immediately reimburse Landlord for all utility charges billed to Landlord for Tenant’s period of occupancy.</p>
+        <p style="font-size: 8pt; color: #4a5568; margin-top: 8px; text-align: justify;"><strong>Tenant Utility Responsibility:</strong> Tenant shall be solely responsible for selecting, connecting, and paying for all utility services serving the Premises during the lease term, except as explicitly provided herein. Tenant agrees to transfer and establish all required utility accounts directly in Tenant's name effective on or before the first day of the Lease Term (Move-In Date). Tenant shall be responsible for all account setup fees, transfer charges, and monthly billing incurred for utility accounts established in Tenant's name during the Lease Term. If Tenant fails to transfer required utilities to Tenant's name by the Move-In Date, Tenant shall immediately reimburse Landlord for all utility charges billed to Landlord for Tenant's period of occupancy.</p>
 
         ${petBlock}
 
         ${nevadaSections}
 
-        ${disclosuresSection}
+        ${property.state === 'CA' ? `
+        ${formatDisclosuresForLease(property, 6)}
+        ` : ''}
 
-
-        <h2>${utilitySectionNumber}. Utility Company Reference Addendum (${utilityLocation})</h2>
+        <h2>${property.state === 'CA' ? '7' : '9'}. Utility Company Reference Addendum (${utilityLocation})</h2>
         <table class="table-summary">
             ${utilityCompanies}
         </table>
-        <p class="text-line" style="font-size: 9px; color: var(--medium-gray); margin-top: 4px;">
-          Note: Utility connection rules and key release requirements are governed by Section 3 of this Lease Agreement.
-        </p>
 
-        <h2>${signaturesSectionNumber}. Signatures & Execution</h2>
-        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ________________.</p>
+        <h2>${property.state === 'CA' ? '8' : '10'}. Signatures & Execution</h2>
+        <p>IN WITNESS WHEREOF, the parties have executed this Lease as of ${today}.</p>
 
         ${sigTable}
 
         <div class="legal-notice">
             <h4>Legal & Digital Signature Notice</h4>
-                This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in ${property.state === 'CA' ? 'California under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and California\'s Uniform Electronic Transactions Act (Cal. Civ. Code § 1633.1 et seq.)' : 'Nevada under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA) (NRS Chapter 719)'}.
+            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
             <ul>
                 <li>Signature records include timestamp, IP address, user agent, and signature image audit trails.</li>
                 <li>This document is provided for informational purposes; parties should consult legal counsel for compliance.</li>
@@ -1067,25 +988,6 @@ function buildProfessionalHTML(lease: LeaseDocument, sections: Record<string, st
 
         .disclosure strong {
           color: var(--dark-gray);
-        }
-
-        .bed-bug-disclosure {
-          font-size: 10pt;
-          line-height: 1.5;
-          color: #000;
-        }
-
-        .bed-bug-disclosure strong {
-          color: #000;
-          font-size: 10pt;
-        }
-
-        .bed-bug-disclosure br {
-          line-height: 1.5;
-        }
-
-        .bed-bug-disclosure .disclosure {
-          font-size: 10pt;
         }
 
         .addendum-section {

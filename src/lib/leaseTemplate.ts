@@ -230,7 +230,7 @@ The Premises are leased fully furnished, including furniture, electronics, kitch
 <strong>Care & Maintenance:</strong> Tenant agrees to maintain all furniture, housewares, and supplied items in good, clean, and operable condition. Tenant shall not remove any provided furnishings or supplies from the Premises.
 <strong>Loss & Damage:</strong> Normal wear and tear is expected; however, Tenant shall be financially responsible for replacing or repairing any missing items, stained/damaged upholstery, or broken kitchenware beyond standard wear. Deductions for missing or damaged personal property may be made from the Security Deposit pursuant to California Civil Code § 1950.5.
 <strong>Consumables:</strong> Landlord provides initial starter supplies (e.g., trash bags, paper products, soap). Tenant is responsible for replenishing all consumable goods for their own use during the lease term.
-${property.state === 'CA' ? `<strong>Snow & Freeze Protection:</strong> Landlord-provided snow removal is strictly limited to seasonal driveway plowing. Tenant is responsible for clearing snow and ice from walkways, steps, entryways, and decks. Tenant agrees to maintain the property heating system at a minimum of 55°F at all times during the lease term to prevent freeze damage to plumbing.` : ''}
+${property.state === 'CA' ? `<strong>Freeze Protection:</strong> Tenant agrees to maintain the property heating system at a minimum of 55°F at all times during the lease term to prevent freeze damage to plumbing.` : ''}
 
   ${disclosuresSection}
 
@@ -267,7 +267,7 @@ TENANT SIGNATURE: __________________________
 Date: __________________________
 
 ADDENDUM B — UTILITY COMPANY CHECKLIST
-The following utility companies apply to the property (${property.city === 'Truckee' ? 'Truckee, CA' : 'Reno, NV'}). Tenant and Landlord should verify contact information and set up accounts before move-in.
+The following utility companies apply to the property (${property.city === 'Fremont' ? 'Fremont, CA' : 'Reno, NV'}). Tenant and Landlord should verify contact information and set up accounts before move-in.
 
 ${terms.checkedUtilities && terms.checkedUtilities.length > 0 ? terms.checkedUtilities.map(u => {
   const lines = property.city === 'Truckee' ? [

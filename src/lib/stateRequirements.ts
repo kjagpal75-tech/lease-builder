@@ -89,13 +89,26 @@ export const getStateRequirements = (state: State): StateRequirements => {
     case 'CA':
       return {
         requiredDisclosures: [
-          'Authorized Manager Information (CA Civil Code 1962)',
-          "Megan's Law / Sex Offender Registry Notice (Civil Code 2079.10a)",
-          'Bed Bug Disclosure (Civil Code 1954.603)',
-          'Smoking Policy (Civil Code 1947.5)',
-          'Lead-Based Paint for pre-1978 housing (Federal Title X)',
-          'Flood Hazard when applicable (Gov. Code 8589.45)',
-          'Additional condition-based disclosures (mold, asbestos, ordnance, death, shared utilities, pest control)',
+          'Authorized Manager / Owner Information (CA Civil Code § 1962)',
+          "Megan's Law / Sex Offender Registry Notice (Civil Code § 2079.10a)",
+          'Bed Bug Disclosure (Civil Code § 1954.603)',
+          'Smoking Policy (Civil Code § 1947.5)',
+          'Smoke and Carbon Monoxide Detectors (Health & Safety Code §§ 13113.7, 17926)',
+          'Water-Conserving Plumbing Fixtures (Civil Code § 1101.5)',
+          'AB 1482 Tenant Protection Act Notice (Civil Code §§ 1946.2, 1947.12)',
+          'Lead-Based Paint Disclosure for pre-1978 housing (Federal Title X)',
+          'Asbestos Advisory for pre-1981 buildings (Cal/OSHA / H&S rules)',
+          'Flood Hazard Disclosure (Government Code § 8589.45)',
+          'Former Military Ordnance Disclosure (Civil Code § 1940.7)',
+          'Death on Property Disclosure (Civil Code § 1710.2)',
+          'Mold Disclosure (Health & Safety Code §§ 26147–26148)',
+          'Periodic Pest Control Notice (Civil Code § 1940.8; Bus. & Prof. Code § 8538)',
+          'Shared Utility Meters Disclosure (Civil Code § 1940.9)',
+          'Demolition Permit Disclosure (Civil Code § 1940.6)',
+          'Methamphetamine / Fentanyl Contamination Disclosure (Health & Safety Code §§ 25400.10 et seq.)',
+          'HOA / Common Interest Development Notice (Civil Code §§ 4740 et seq.)',
+          'Proposition 65 Warning for Multi-Unit Housing (Health & Safety Code § 25249.5 et seq.)',
+          'Local Rent Ordinance / Just Cause Notice (city-specific)',
         ],
         requiredClauses: [
           'Rent Amount and Due Date',
@@ -299,6 +312,7 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
           flags.knownAsbestos
             ? 'Landlord discloses that asbestos-containing materials are known or believed to be present at the property. Tenant shall not disturb suspect materials and shall notify Landlord before any alterations.'
             : 'Buildings constructed before 1981 may contain asbestos-containing materials. Tenant shall not sand, drill, or otherwise disturb suspect materials and shall notify Landlord before alterations that may disturb building materials.',
+          'Landlord has no knowledge of asbestos-containing materials at the property except as otherwise disclosed in writing, and has provided Tenant any available records or reports pertaining to asbestos.',
         ].join('\n'),
       });
     }

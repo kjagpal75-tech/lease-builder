@@ -20,6 +20,10 @@ export default function LeaseBuilder() {
   const [savedLeases, setSavedLeases] = useState<LeaseDocument[]>([]);
   const [ownedProperties, setOwnedProperties] = useState<OwnedProperty[]>([]);
   const [showPropertiesManager, setShowPropertiesManager] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importError, setImportError] = useState('');
+  const [importSuccess, setImportSuccess] = useState(false);
 
   const loadSavedLeases = () => {
     setSavedLeases(storageService.getAllLeases());
@@ -217,8 +221,8 @@ export default function LeaseBuilder() {
         if (!lease.property) return false;
         const prop = ownedPropertiesService.getById(currentPropertyId);
         if (!prop) return false;
-        const leaseKey = `${lease.property.address}|${lease.property.city}|${lease.property.state}|${lease.property.zipCode}`.toLowerCase().trim();
-        const propKey = `${prop.address}|${prop.city}|${prop.state}|${prop.zipCode}`.toLowerCase().trim();
+        const leaseKey = `${lease.property.address}|${lease.property.city}|${lease.property.state}|${lease.property.zipCode}`.toLowerCase().replace(/\s+/g, ' ').trim();
+        const propKey = `${prop.address}|${prop.city}|${prop.state}|${prop.zipCode}`.toLowerCase().replace(/\s+/g, ' ').trim();
         return leaseKey === propKey;
       })
     : [];
@@ -770,8 +774,8 @@ export default function LeaseBuilder() {
                 if (!lease.property) return false;
                 const prop = ownedPropertiesService.getById(property.id);
                 if (!prop) return false;
-                const leaseKey = `${lease.property.address}|${lease.property.city}|${lease.property.state}|${lease.property.zipCode}`.toLowerCase().trim();
-                const propKey = `${prop.address}|${prop.city}|${prop.state}|${prop.zipCode}`.toLowerCase().trim();
+                const leaseKey = `${lease.property.address}|${lease.property.city}|${lease.property.state}|${lease.property.zipCode}`.toLowerCase().replace(/\s+/g, ' ').trim();
+                const propKey = `${prop.address}|${prop.city}|${prop.state}|${prop.zipCode}`.toLowerCase().replace(/\s+/g, ' ').trim();
                 return leaseKey === propKey;
               });
 
@@ -867,6 +871,136 @@ export default function LeaseBuilder() {
             >
               Add Your First Property
             </button>
+          </div>
+        )}
+        {savedLeases.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">All Saved Leases</h2>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex justify-between items-center mb-4">
+                <button
+                  type="button"
+                  onClick={() => setShowImportModal(true)}
+                  className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                >
+                  Import
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const data = storageService.exportLeases();
+                    const blob = new Blob([data], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'leases-backup.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                >
+                  Export
+                </button>
+              </div>
+              <div className="space-y-3">
+                {savedLeases.map((lease) => (
+                  <div
+                    key={lease.id}
+                    onClick={() => handleLoadLease(lease)}
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {lease.tenants.map(t => t.name).join(', ')}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {lease.property?.address}, {lease.property?.city}, {lease.property?.state} {lease.property?.zipCode}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {formatLocalDate(lease.terms.startDate)} - {formatLocalDate(lease.terms.endDate)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {formatRentSummary(lease.terms)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">
+                          {new Date(lease.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {showImportModal && (
+          <div className="mt-6">
+            <div className="bg-white rounded-lg shadow p-6 max-w-md">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Import Leases</h3>
+              {importError && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded">
+                  {importError}
+                </div>
+              )}
+              {importSuccess && (
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded">
+                  Successfully imported {importSuccess} lease(s)
+                </div>
+              )}
+              <input
+                type="file"
+                accept=".json"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const content = event.target?.result as string;
+                      setImportText(content);
+                    };
+                    reader.readAsText(file);
+                  }
+                }}
+                className="mb-3 text-sm text-gray-600"
+              />
+              <textarea
+                rows={8}
+                cols={50}
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-md mb-4 resize-none focus:outline-none focus:border-blue-500"
+                placeholder="Paste JSON array of leases here, or select a .json file above"
+              ></textarea>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowImportModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const result = storageService.importLeases(importText);
+                    if (result.success) {
+                      setImportSuccess(true);
+                      setImportText('');
+                      setShowImportModal(false);
+                      loadSavedLeases();
+                    } else {
+                      setImportError(result.error || 'Import failed');
+                    }
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                >
+                  Import
+                </button>
+              </div>
+            </div>
           </div>
         )}
         {showPropertiesManager && (
