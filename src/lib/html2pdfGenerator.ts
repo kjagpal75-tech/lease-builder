@@ -1,4 +1,4 @@
-import { LeaseDocument } from '@/types/lease';
+import { LeaseDocument, propertyTypeLabel } from '@/types/lease';
 import { generateLeaseText } from './leaseTemplate';
 import { formatLocalDate } from './storage';
 import { formatDisclosuresForLease } from './stateRequirements';
@@ -113,8 +113,8 @@ export const generateLeaseHTML = (lease: LeaseDocument): string => {
 export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   const { landlords, tenants, coSigners, property, terms } = lease;
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const start = terms.startDate ? new Date(terms.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
-  const end = terms.endDate ? new Date(terms.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+  const start = terms.startDate ? formatLocalDate(terms.startDate) : '';
+  const end = terms.endDate ? formatLocalDate(terms.endDate) : '';
 
   // Build landlord info with full details matching preview
   const landlordInfo = landlords.map((l, i) => `
@@ -540,12 +540,12 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <h2>1. Property Description & Lease Term</h2>
         <table class="table-summary">
             <tr>
-                <th>Property Address</th>
-                <td>${property.address}</td>
-            </tr>
+        <th>Property Address</th>
+        <td>${property.address}, ${property.city}, ${property.state} ${property.zipCode}</td>
+     </tr>
             <tr>
                 <th>Property Type</th>
-                <td>${property.type}</td>
+                <td>${propertyTypeLabel[property.type]}</td>
             </tr>
             <tr>
                 <th>Lease Term</th>
