@@ -86,6 +86,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
   const [editingClauseId, setEditingClauseId] = useState<string | null>(null);
   const [editingClauseText, setEditingClauseText] = useState<string>('');
   const [editingClauseSection, setEditingClauseSection] = useState<string>('Lease Terms & Conditions');
+  const [newClauseSection, setNewClauseSection] = useState<string>('Lease Terms & Conditions');
   const [newClauseText, setNewClauseText] = useState<string>('');
 
   useEffect(() => {
@@ -285,7 +286,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
   const addCustomClause = (text: string) => {
     const newClause: CustomClause = {
       id: uuidv4(),
-      section: 'Lease Terms & Conditions',
+      section: newClauseSection,
       text: text,
     };
     setTerms(prev => ({
@@ -725,7 +726,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
             >
               <option value="apartment">Apartment</option>
-              <option value="house">House</option>
+              <option value="house">Single Family Home</option>
               <option value="condo">Condo</option>
               <option value="townhouse">Townhouse</option>
               <option value="other">Other</option>
@@ -1704,11 +1705,23 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Section (new clause)</label>
               <select
-                value="Lease Terms & Conditions"
-                disabled
+                value={newClauseSection}
+                onChange={(e) => setNewClauseSection(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
               >
                 <option value="Lease Terms & Conditions">Lease Terms & Conditions</option>
+                <option value="Property Description">Property Description</option>
+                <option value="Term of Lease">Term of Lease</option>
+                <option value="Rent">Rent</option>
+                <option value="Security Deposit">Security Deposit</option>
+                <option value="Occupants">Occupants</option>
+                <option value="Pets">Pets</option>
+                <option value="Utilities and Services">Utilities and Services</option>
+                <option value="Use of Premises">Use of Premises</option>
+                <option value="Maintenance and Repairs">Maintenance and Repairs</option>
+                <option value="Landlord Entry">Landlord Entry</option>
+                <option value="Default">Default</option>
+                <option value="Governing Law">Governing Law</option>
               </select>
             </div>
             <div className="md:col-span-2">

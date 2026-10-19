@@ -1,4 +1,4 @@
-import { LeaseDocument, defaultDisclosureFlags } from '@/types/lease';
+import { LeaseDocument, defaultDisclosureFlags, propertyTypeLabel } from '@/types/lease';
 import { formatDisclosuresForLease, getStateSpecificClauses } from './stateRequirements';
 import { totalLeasePetRent, totalPetCount, formatLocalDate } from './storage';
 
@@ -23,6 +23,13 @@ export const generateLeaseText = (lease: LeaseDocument): string => {
   };
 
   const stateClauses = getStateSpecificClauses(normalizedProperty.state);
+  // Helper: get custom clauses for a specific section, formatted as paragraphs
+  const getCustomClausesForSection = (section: string): string => {
+    const clauses = (terms.customClauses || []).filter(c => c.section === section);
+    if (clauses.length === 0) return '';
+    return '\n' + clauses.map(c => c.text).join('\n\n');
+  };
+
    // Use section 7 for CA disclosures (after Furnishings at 6, before Utility at 8)
    // Use section 8 for NV disclosures (after Furnishings at 7, before Utility at 9)
    const disclosureSectionNumber = property.state === 'CA' ? 7 : 8;
@@ -81,13 +88,13 @@ Property Address:
 ${property.address}
 ${property.city}, ${property.state} ${property.zipCode}
 ${property.unitNumber ? `Unit: ${property.unitNumber}` : ''}
-Property Type:
-${property.type}
+            Property Type:
+${propertyTypeLabel[property.type]}
 Year Built:
-${property.yearBuilt || 'N/A'}
+${property.yearBuilt || 'N/A'}${getCustomClausesForSection('Property Description')}
 
 2. TERM OF LEASE
-The term of this Lease shall begin on ${formatLocalDate(terms.startDate)} and end on ${formatLocalDate(terms.endDate)}.
+The term of this Lease shall begin on ${formatLocalDate(terms.startDate)} and end on ${formatLocalDate(terms.endDate)}.${getCustomClausesForSection('Term of Lease')}
 
 3. RENT
 ${
@@ -139,12 +146,12 @@ The Holding Deposit is separate from the Security Deposit until credited as stat
   terms.holdingDeposit && terms.holdingDeposit > 0 ? '5' : '4'
 }. SECURITY DEPOSIT
 Tenant shall deposit with Landlord the sum of $${terms.securityDeposit.toFixed(2)} as security for the faithful performance of the terms of this Lease.
-This deposit shall be returned within the time required by ${property.state === 'CA' ? 'California (21 days)' : 'Nevada (30 days)'} law, less any deductions for damages beyond normal wear and tear.
+This deposit shall be returned within the time required by ${property.state === 'CA' ? 'California (21 days)' : 'Nevada (30 days)'} law, less any deductions for damages beyond normal wear and tear.${getCustomClausesForSection('Security Deposit')}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '6' : '5'}. OCCUPANTS
 The premises may be occupied by no more than the following persons:
 ${tenants.map((tenant, i) => `${i + 1}. ${tenant.name} (Tenant)`).join('\n')}
-${terms.occupants.length > 0 && terms.occupants[0] ? terms.occupants.map((occupant, i) => `${tenants.length + i + 1}. ${occupant}`).join('\n') : ''}
+${terms.occupants.length > 0 && terms.occupants[0] ? terms.occupants.map((occupant, i) => `${tenants.length + i + 1}. ${occupant}`).join('\n') : ''}${getCustomClausesForSection('Occupants')}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '7' : '6'}. PETS
 ${
@@ -188,16 +195,16 @@ ${(terms.utilitiesReimbursed || []).length > 0 ? (terms.utilitiesReimbursed || [
   const amount = terms.utilityReimbursementAmounts?.[u];
   return `- ${u}${amount ? ` — $${amount.toFixed(2)}/month` : ''}`;
 }).join('\n') : 'None'}
-${(terms.utilitiesReimbursed || []).length > 0 ? `The above utilities are paid by Landlord and reimbursed by Tenant as part of the Rent. These utilities cannot be transferred to Tenant's name and remain in Landlord's account.` : ''}
+${(terms.utilitiesReimbursed || []).length > 0 ? `The above utilities are paid by Landlord and reimbursed by Tenant as part of the Rent. These utilities cannot be transferred to Tenant's name and remain in Landlord's account.${getCustomClausesForSection('Utilities and Services')}` : ''}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '9' : '8'}. USE OF PREMISES
-The premises shall be used and occupied by Tenant solely as a private residence. Tenant shall comply with all laws, ordinances, and regulations regarding the use of the premises.
+The premises shall be used and occupied by Tenant solely as a private residence. Tenant shall comply with all laws, ordinances, and regulations regarding the use of the premises.${getCustomClausesForSection('Use of Premises')}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '10' : '9'}. MAINTENANCE AND REPAIRS
-Tenant shall maintain the premises in clean and sanitary condition and shall surrender the premises at the end of the term in the same condition as received, normal wear and tear excepted.
+Tenant shall maintain the premises in clean and sanitary condition and shall surrender the premises at the end of the term in the same condition as received, normal wear and tear excepted.${getCustomClausesForSection('Maintenance and Repairs')}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '11' : '10'}. LANDLORD ENTRY
-Landlord may enter the premises at reasonable times with 24-hour notice for inspection, maintenance, or to show the property to prospective tenants or buyers. In case of emergency, Landlord may enter without notice.
+Landlord may enter the premises at reasonable times with 24-hour notice for inspection, maintenance, or to show the property to prospective tenants or buyers. In case of emergency, Landlord may enter without notice.${getCustomClausesForSection('Landlord Entry')}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '12' : '11'}. ${property.state === 'NV' ? 'DEFAULT AND REMEDIES' : 'DEFAULT'}
 ${property.state === 'NV' ? `
@@ -220,7 +227,7 @@ A. Choice of Law: This Lease Agreement, along with all incorporated addendums, d
 B. Venue Selection: Any judicial or summary eviction dispute arising directly under this lease framework shall be subject to the exclusive jurisdiction of the Justice Court in the specific county where the rental property is physically located.
 
 C. Severability: If any clause, provision, or statutory reference within this Lease is found to be void, illegal, or legally unenforceable under Nevada law (including NRS Chapter 118A), such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remainder of the Lease shall remain in full force and effect.
-` : `This Lease shall be governed by and construed in accordance with the laws of the State of ${property.state === 'CA' ? 'California' : 'Nevada'}.`}
+` : `This Lease shall be governed by and construed in accordance with the laws of the State of ${property.state === 'CA' ? 'California' : 'Nevada'}.`}${getCustomClausesForSection('Governing Law')}
 
 ${stateClauses.join('\n')}
 
@@ -235,12 +242,7 @@ ${property.state === 'CA' ? `<strong>Freeze Protection:</strong> Tenant agrees t
   ${disclosuresSection}
 
   ${terms.customClauses && terms.customClauses.length > 0 ? `
-  CUSTOM CLAUSE / PROVISION
-  __________________________
-  ${terms.customClauses.map((clause) => `
-  Section: ${clause.section}
-  ${clause.text}
-  `).join('\n')}
+  ${terms.customClauses.map((clause) => `${clause.text}`).join('\n\n')}
   ` : ''}
 
   ADDENDUM A — TENANT RESPONSIBILITIES AND RULES (PET-RELATED)
@@ -248,16 +250,13 @@ __________________________
 
 This Addendum forms part of the Residential Lease Agreement between Landlord and Tenant. By signing the Lease, Tenant acknowledges and agrees to the following pet-related responsibilities and rules:
 
-C. TENANT RESPONSIBILITIES AND RULES
-1) Control and Containment: Pets must be kept on a leash at all times when outside the dwelling unit. Pets are prohibited from roaming common areas unattended.
-2) Sanitation: Tenant is strictly responsible for the immediate disposal of all pet waste. Waste must be placed in designated trash receptacles.
-3) Damage and Disturbance: Tenant ensures pets will not cause property damage or disturb neighbors (e.g., excessive barking). Tenant accepts full financial liability for repairs or flooring replacement caused by pet damage.
-4) Flooring Protection and Rug Requirements: Tenant acknowledges that the premises features premium hard-surface wood-style flooring. To prevent localized wear, deep scratches, and finish dulling, Tenant agrees to place protective area rugs, runners, or mats over high-traffic pathways and underneath all designated pet resting areas.
-5) Moisture Barriers and Food Stations: Tenant must place a 100% waterproof mat or protective tray underneath all pet food bowls, water dishes, and litter boxes. Disposable training pads or pet beds are strictly prohibited from sitting directly on the bare flooring surfaces if they are damp or lack a solid rubber/plastic backing.
-6) Immediate Spill and Waste Remediation: Standing liquid is the primary cause of floor warping, seam swelling, and permanent staining. Tenant is strictly required to wipe up all pet liquid accidents (including urine, saliva, or vomit) immediately upon discovery. Any liquid left standing that seeps into floorboard seams, baseboards, or subflooring resulting in structural buckle, stain, or odor will be deemed property damage and not normal wear and tear.
-7) Claw and Scratch Prevention: Tenant agrees to keep the pet's claws and nails routinely trimmed short and filed smooth to minimize physical scratching, gouging, or chipping of the floor's protective wear layer.
-8) Safe Cleaning Practices: Tenant agrees to refrain from using harsh abrasive scrubbers, bleach, heavy solvents, or soaking mops on the flooring. Only manufacturer-approved, pH-neutral hard-surface cleaners may be used.
-9) End-of-Tenancy Liability: Upon move-out, Tenant accepts full financial liability for the costs of professional board replacement, deep sanding, or chemical refinishing required to correct pet-inflicted floor damage or neutralize deep-set biological odors.
+1. Control & Sanitation: Must be leashed outdoors. Immediate waste disposal in trash receptacles required.
+2. Flooring Protection (Hard-Surface): Where the premises features premium hard-surface wood-style flooring, protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats are strictly required under food/water bowls and litter boxes.
+3. Flooring Protection (Carpet): In all carpeted areas, Tenant shall take proactive measures to prevent pet staining and odor absorption. If a pet accident occurs on carpeted surfaces, Tenant must immediately apply specialized, carpet-safe enzymatic cleaners designed to completely eliminate proteins, tracking, and deep-set odors.
+4. Immediate Spill & Stain Remediation: Liquid spills, pet accidents, or waste tracking must be cleaned and treated immediately. For hard surfaces, standing liquid causing floor warping or seam swelling constitutes damage beyond normal wear and tear. For carpeted surfaces, any permanent discoloration, fiber degradation, or subfloor urine saturation constitutes damage beyond normal wear and tear and will result in complete carpet and pad replacement at the Tenant's expense.
+5. Maintenance & Professional Move-Out Cleaning: Claws and nails must be kept trimmed to prevent scratching of hard floors and snagging of carpets. Only pH-neutral hard-surface floor cleaners are permitted on wood-style flooring (no harsh solvents/bleach). Upon move-out, if any pet odors or stains are detected, Landlord reserves the right to deduct the cost of professional, truck-mounted hot-water extraction (steam cleaning) and sanitization from the Security Deposit pursuant to CA Civil Code § 1950.5.
+6. Assistance Animals: Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage or deep carpet staining/odors caused by the animal to the premises.
+7. Violations: Breach of pet policy allows issuance of California 3-Day Notice to Perform Covenant or Quit, leading to formal eviction proceedings if uncured.
 
 __________________________
 LANDLORD SIGNATURE: __________________________

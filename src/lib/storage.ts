@@ -12,10 +12,10 @@ export function formatLocalDate(dateString: string): string {
   if (!dateString) return '';
   // Handle ISO date strings by splitting at T to get just the date part
   const datePart = dateString.includes('T') ? dateString.split('T')[0] : dateString;
-  // Parse the date string (YYYY-MM-DD) to avoid timezone issues
   const [year, month, day] = datePart.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString();
+  if (!year || !month || !day) return datePart;
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${monthNames[month - 1]} ${day}, ${year}`;
 }
 
 const STORAGE_KEY = 'lease_builder_documents';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LeaseDocument, Signature, OwnedProperty, Property, defaultDisclosureFlags } from '@/types/lease';
+import { LeaseDocument, Signature, OwnedProperty, Property, defaultDisclosureFlags, propertyTypeLabel } from '@/types/lease';
 import { storageService, formatRentSummary, formatLocalDate } from '@/lib/storage';
 import { downloadPDF, previewPDF } from '@/lib/pdfGenerator';
 import { generateProfessionalLeaseHTML } from '@/lib/html2pdfGenerator';
@@ -263,7 +263,7 @@ export default function LeaseBuilder() {
             <h1 className="text-3xl font-bold text-gray-900">Sign Lease Agreement</h1>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
-                <strong>Property:</strong> {currentLease.property.address}, {currentLease.property.city}, {currentLease.property.state}
+                <strong>Property:</strong> {currentLease.property.address}, {currentLease.property.city}, {currentLease.property.state} {currentLease.property.zipCode}
               </p>
               <p className="text-sm text-blue-800 mt-1">
                 <strong>Rent:</strong> {formatRentSummary(currentLease.terms)}
@@ -637,7 +637,7 @@ export default function LeaseBuilder() {
                   {property.address}, {property.city}, {property.state} {property.zipCode}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {property.type} {property.unitNumber ? `• Unit #${property.unitNumber}` : ''}
+                  {propertyTypeLabel[property.type]} {property.unitNumber ? `• Unit #${property.unitNumber}` : ''}
                 </p>
               </div>
               <button

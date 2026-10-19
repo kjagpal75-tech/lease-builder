@@ -100,7 +100,7 @@ export const ownedPropertiesService = {
   displayLabel(property: Property): string {
     const name = property.label?.trim();
     const unit = property.unitNumber ? ` #${property.unitNumber}` : '';
-    const line = `${property.address}${unit}, ${property.city}, ${property.state}`;
+    const line = `${property.address}${unit}, ${property.city}, ${property.state} ${property.zipCode}`;
     return name ? `${name} — ${line}` : line;
   },
 };

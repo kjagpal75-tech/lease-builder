@@ -2,6 +2,15 @@ export type State = 'CA' | 'NV';
 
 export type PropertyType = 'house' | 'apartment' | 'condo' | 'townhouse' | 'other';
 
+/** Maps a PropertyType value to a human-readable display label. */
+export const propertyTypeLabel: Record<PropertyType, string> = {
+  house: 'Single Family Home',
+  apartment: 'Apartment',
+  condo: 'Condo',
+  townhouse: 'Townhouse',
+  other: 'Other',
+};
+
 export type SmokingPolicy = 'prohibited' | 'allowed' | 'restricted';
 
 export interface Party {

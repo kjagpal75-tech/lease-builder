@@ -155,13 +155,11 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     </div>
     <h3>Tenant Pet Responsibilities & Rules</h3>
     <p><strong>Control & Sanitation:</strong> Must be leashed outdoors. Immediate waste disposal in trash receptacles required.</p>
-    <p><strong>Flooring Protection:</strong> Premises features premium hard-surface wood-style flooring. Protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats required under food/water bowls and litter boxes.</p>
-    <p><strong>Immediate Spill Remediation:</strong> Liquid spills/accidents must be wiped immediately. Standing liquid causing floor warping/seam swelling constitutes damage beyond normal wear and tear.</p>
-    <p><strong>Maintenance:</strong> Claws/nails must be kept trimmed. Only pH-neutral hard-surface floor cleaners permitted (no harsh solvents/bleach).</p>
-    <p><strong>Assistance Animals:</strong> ${property.state === 'NV'
-      ? 'Verified service and emotional support animals are exempt from pet deposits/fees (NRS 118.105), though tenants remain liable for physical damage.'
-      : 'Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage caused by the animal to the premises.'}
-    </p>
+    <p><strong>Flooring Protection (Hard-Surface):</strong> Where the premises features premium hard-surface wood-style flooring, protective area rugs/runners must be placed in high-traffic pathways and pet resting areas. 100% waterproof mats are strictly required under food/water bowls and litter boxes.</p>
+    <p><strong>Flooring Protection (Carpet):</strong> In all carpeted areas, Tenant shall take proactive measures to prevent pet staining and odor absorption. If a pet accident occurs on carpeted surfaces, Tenant must immediately apply specialized, carpet-safe enzymatic cleaners designed to completely eliminate proteins, tracking, and deep-set odors.</p>
+    <p><strong>Immediate Spill & Stain Remediation:</strong> Liquid spills, pet accidents, or waste tracking must be cleaned and treated immediately. For hard surfaces, standing liquid causing floor warping or seam swelling constitutes damage beyond normal wear and tear. For carpeted surfaces, any permanent discoloration, fiber degradation, or subfloor urine saturation constitutes damage beyond normal wear and tear and will result in complete carpet and pad replacement at the Tenant's expense.</p>
+    <p><strong>Maintenance & Professional Move-Out Cleaning:</strong> Claws and nails must be kept trimmed to prevent scratching of hard floors and snagging of carpets. Only pH-neutral hard-surface floor cleaners are permitted on wood-style flooring (no harsh solvents/bleach). Upon move-out, if any pet odors or stains are detected, Landlord reserves the right to deduct the cost of professional, truck-mounted hot-water extraction (steam cleaning) and sanitization from the Security Deposit pursuant to CA Civil Code § 1950.5.</p>
+    <p><strong>Assistance Animals:</strong> Verified service and emotional support animals (ESAs) are exempt from pet rent, pet fees, or breed/weight restrictions under the federal Fair Housing Act (FHA) and the California Fair Employment and Housing Act (FEHA). However, owners of assistance animals remain financially liable for any physical damage or deep carpet staining/odors caused by the animal to the premises.</p>
     <p><strong>Violations:</strong> Breach of pet policy allows issuance of ${property.state === 'NV' ? 'Nevada 5-Day Notice to Cure or Quit' : 'California 3-Day Notice to Perform Covenant or Quit'}, leading to formal eviction proceedings if uncured.</p>
   ` : '';
 
@@ -605,6 +603,12 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         ${petBlock}
 
         ${nevadaSections}
+
+        ${terms.customClauses && terms.customClauses.length > 0 ? `
+        ${terms.customClauses.map(clause => `
+          <p><strong>${escapeHtml(clause.section)}:</strong> ${escapeHtml(clause.text)}</p>
+        `).join('')}
+        ` : ''}
 
         ${property.state === 'CA' ? `
         ${formatDisclosuresForLease(property, 6)}
