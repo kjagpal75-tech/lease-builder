@@ -605,9 +605,22 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         ${nevadaSections}
 
         ${terms.customClauses && terms.customClauses.length > 0 ? `
-        ${terms.customClauses.map(clause => `
-          <p><strong>${escapeHtml(clause.section)}:</strong> ${escapeHtml(clause.text)}</p>
-        `).join('')}
+        ${terms.customClauses.map(clause => {
+          // Split by line breaks to preserve paragraphs
+          const paragraphs = clause.text.split('\n');
+          const processedParagraphs = paragraphs.map(para => {
+            const trimmed = para.trim();
+            if (!trimmed) return '';
+            // Bold the first sentence up to the colon (e.g. "Label: rest of text")
+            const colonIdx = trimmed.indexOf(':');
+            if (colonIdx >= 0) {
+              return `<p><strong>${escapeHtml(trimmed.substring(0, colonIdx))}:</strong> ${escapeHtml(trimmed.substring(colonIdx + 1))}</p>`;
+            } else {
+              return `<p>${escapeHtml(trimmed)}</p>`;
+            }
+          }).filter(p => p !== '');
+          return processedParagraphs.join('');
+        }).join('')}
         ` : ''}
 
         ${property.state === 'CA' ? `

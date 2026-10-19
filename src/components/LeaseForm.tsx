@@ -1640,8 +1640,12 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                           type="button"
                           onClick={() => {
                             if (editingClauseText.trim()) {
-                              updateCustomClause(clause.id, 'section', editingClauseSection);
-                              updateCustomClause(clause.id, 'text', editingClauseText);
+                              setTerms(prev => ({
+                                ...prev,
+                                customClauses: (prev.customClauses || []).map(c =>
+                                  c.id === clause.id ? { ...c, section: editingClauseSection, text: editingClauseText } : c
+                                ),
+                              }));
                             }
                             setEditingClauseId(null);
                             setEditingClauseText('');
