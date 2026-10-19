@@ -716,11 +716,10 @@ export const formatDisclosuresForLease = (property: Property, sectionNumber?: nu
 
   return `
         <h2>${num}. REQUIRED AND APPLICABLE DISCLOSURES (${property.state === 'CA' ? 'California' : 'Nevada'})</h2>
-        <ol>
         ${disclosures.map((d) => {
           const title = `${d.title}${d.statute ? ` (${d.statute})` : ''}`;
           const body = stripDuplicateTitle(d.leaseText, d.title, d.statute);
-          return `<li><strong>${title}</strong><br>${body}</li>`;
+          return `<p><strong>${title}</strong>: ${body}</p>`;
         }).join('')}
-        </ol>`;
+`;
 };
