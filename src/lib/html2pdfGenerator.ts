@@ -599,10 +599,6 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
                 <td><strong>Sewer ($${terms.utilityReimbursementAmounts.sewer.toFixed(2)}/month)</strong> — Added to monthly rent; remains in Landlord's account.</td>
             </tr>
             ` : ''}
-            <tr>
-                <th>Included in Rent (No Charge)</th>
-                <td>None</td>
-            </tr>
         </table>
         <p style="font-size: 8pt; color: #4a5568; margin-top: 8px; text-align: justify;"><strong>Tenant Utility Responsibility:</strong> Tenant shall be solely responsible for selecting, connecting, and paying for all utility services serving the Premises during the lease term, except as explicitly provided herein. Tenant agrees to transfer and establish all required utility accounts directly in Tenant's name effective on or before the first day of the Lease Term (Move-In Date). Tenant shall be responsible for all account setup fees, transfer charges, and monthly billing incurred for utility accounts established in Tenant's name during the Lease Term. If Tenant fails to transfer required utilities to Tenant's name by the Move-In Date, Tenant shall immediately reimburse Landlord for all utility charges billed to Landlord for Tenant's period of occupancy.</p>
 
