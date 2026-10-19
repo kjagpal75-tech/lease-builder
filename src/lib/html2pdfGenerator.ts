@@ -559,7 +559,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
             </tr>
             <tr>
                 <th>Security Deposit</th>
-                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> (${property.state === 'CA' ? 'Returned within 21 calendar days of move-out per CA Civil Code § 1950.5, less legal deductions.' : 'Returned within 30 days of move-out per NV law, less legal deductions.'})</td>
+                <td><strong>$${terms.securityDeposit?.toFixed(2) || '0.00'}</strong> This deposit must be paid in full at the time of lease signing strictly via Zelle or Cashier's Check; personal checks or cash will not be accepted for the security deposit. The deposit will be returned within 21 calendar days of move-out per CA Civil Code § 1950.5, less legal deductions.${property.state === 'CA' ? '' : ' (Returned within 30 days of move-out per NV law, less legal deductions.)'}</td>
             </tr>
             <tr>
                 <th>Late Fee</th>
@@ -574,7 +574,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <h2>3. Occupants & Utilities</h2>
         <table class="table-summary">
             <tr>
-                <th>Authorized Occupants</th>
+                <th>Authorized Tenants & Occupants</th>
                 <td>${tenants.map(t => t.name).join(', ')}</td>
             </tr>
             ${property.state === 'CA' ? `

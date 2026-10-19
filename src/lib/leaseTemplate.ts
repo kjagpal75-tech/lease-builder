@@ -146,7 +146,7 @@ The Holding Deposit is separate from the Security Deposit until credited as stat
   terms.holdingDeposit && terms.holdingDeposit > 0 ? '5' : '4'
 }. SECURITY DEPOSIT
 Tenant shall deposit with Landlord the sum of $${terms.securityDeposit.toFixed(2)} as security for the faithful performance of the terms of this Lease.
-This deposit shall be returned within the time required by ${property.state === 'CA' ? 'California (21 days)' : 'Nevada (30 days)'} law, less any deductions for damages beyond normal wear and tear.${getCustomClausesForSection('Security Deposit')}
+This deposit must be paid in full at the time of lease signing strictly via Zelle or Cashier's Check; personal checks or cash will not be accepted for the security deposit. The deposit will be returned within 21 calendar days of move-out per CA Civil Code § 1950.5, less legal deductions.${getCustomClausesForSection('Security Deposit')}
 
 ${terms.holdingDeposit && terms.holdingDeposit > 0 ? '6' : '5'}. OCCUPANTS
 The premises may be occupied by no more than the following persons:
