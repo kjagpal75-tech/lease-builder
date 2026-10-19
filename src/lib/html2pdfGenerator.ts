@@ -574,12 +574,24 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         </table>
 
         <h2>3. Occupants & Utilities</h2>
-        <p><strong>Authorized Occupants:</strong> ${tenants.map(t => t.name).join(', ')}.</p>
-        ${property.state === 'CA' ? `<p><strong>Residency Restrictions:</strong> Only named signing Tenants and Occupants are permitted to reside on the premises. Guest stays exceeding 7 consecutive days or 14 total days in any 6-month period require Landlord's prior written approval.</p>` : ''}
         <table class="table-summary">
+            <tr>
+                <th>Authorized Occupants</th>
+                <td>${tenants.map(t => t.name).join(', ')}</td>
+            </tr>
+            ${property.state === 'CA' ? `
+            <tr>
+                <th>Residency Restrictions</th>
+                <td>Only named signing Tenants and Occupants are permitted to reside on the premises. Guest stays exceeding 7 consecutive days or 14 total days in any 6-month period require Landlord's prior written approval.</td>
+            </tr>
+            ` : ''}
             <tr>
                 <th>Tenant Direct Responsibility</th>
                 <td>${property.state === 'CA' ? 'Water, Garbage/Trash, Electricity, Gas, Cable TV' : 'Water, Garbage, Electricity, Gas, Internet, Cable TV'}</td>
+            </tr>
+            <tr>
+                <th>Included in Rent (No Charge)</th>
+                <td>None</td>
             </tr>
             ${terms.utilitiesReimbursed && terms.utilitiesReimbursed.includes('sewer') && terms.utilityReimbursementAmounts?.sewer ? `
             <tr>
