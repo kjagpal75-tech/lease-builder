@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Property, MoveInChecklistData, MoveInChecklistItem, Attachment } from '@/types/lease';
-import DocumentAttachments from './DocumentAttachments';
+import { previewMoveInChecklistPDF } from '@/lib/moveInChecklistPdf';
 
 interface MoveInConditionChecklistProps {
   property: Property;
@@ -19,6 +19,11 @@ interface PropertyFeatures {
   pool: boolean;
 }
 
+interface RoomLabels {
+  bedrooms: string[];
+  bathrooms: string[];
+}
+
 const DEFAULT_DESCRIPTION = 'Click to add a description or notes about the condition of this item.';
 
 const DEFAULT_FEATURES: PropertyFeatures = {
@@ -32,30 +37,42 @@ const DEFAULT_FEATURES: PropertyFeatures = {
   pool: false,
 };
 
+const DEFAULT_ROOM_LABELS: RoomLabels = {
+  bedrooms: [],
+  bathrooms: [],
+};
+
 export default function MoveInConditionChecklist({ property, initialData, onSave }: MoveInConditionChecklistProps) {
   const [features, setFeatures] = useState<PropertyFeatures>(() => {
-    if (initialData?.features) {
-      return { ...DEFAULT_FEATURES, ...initialData.features };
-    }
+    // Honor property features set in Lease Review page; fall back to saved checklist data
     return {
-      bedrooms: property.bedrooms || 0,
-      bathrooms: property.bathrooms || 0,
-      kitchen: property.kitchen || false,
-      garage: property.garage || false,
-      basement: property.basement || false,
-      fireplace: property.fireplace || false,
-      deck: property.deck || false,
-      pool: property.pool || false,
+      bedrooms: property.bedrooms ?? initialData?.features?.bedrooms ?? 0,
+      bathrooms: property.bathrooms ?? initialData?.features?.bathrooms ?? 0,
+      kitchen: property.kitchen ?? initialData?.features?.kitchen ?? false,
+      garage: property.garage ?? initialData?.features?.garage ?? false,
+      basement: property.basement ?? initialData?.features?.basement ?? false,
+      fireplace: property.fireplace ?? initialData?.features?.fireplace ?? false,
+      deck: property.deck ?? initialData?.features?.deck ?? false,
+      pool: property.pool ?? initialData?.features?.pool ?? false,
     };
   });
 
-  const [items, setItems] = useState<MoveInChecklistItem[]>([]);
   const [explanations, setExplanations] = useState<Record<string, string>>(
     initialData?.explanations || {}
   );
   const [attachments, setAttachments] = useState<Attachment[]>(initialData?.attachments || []);
 
-  const generateItems = useCallback((feats: PropertyFeatures): MoveInChecklistItem[] => {
+  const [roomLabels, setRoomLabels] = useState<RoomLabels>(() => {
+    const saved = initialData?.roomLabels;
+    const bedrooms = property.bedrooms ?? initialData?.features?.bedrooms ?? 0;
+    const bathrooms = property.bathrooms ?? initialData?.features?.bathrooms ?? 0;
+    return {
+      bedrooms: saved?.bedrooms?.slice(0, bedrooms) || Array(bedrooms).fill(''),
+      bathrooms: saved?.bathrooms?.slice(0, bathrooms) || Array(bathrooms).fill(''),
+    };
+  });
+
+  const generateItems = useCallback((feats: PropertyFeatures, labels: RoomLabels): MoveInChecklistItem[] => {
     const checklist: MoveInChecklistItem[] = [];
     let id = 0;
 
@@ -68,26 +85,28 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
 
     // Bedrooms
     for (let i = 1; i <= feats.bedrooms; i++) {
-      checklist.push({ id: `br-${i}-1`, category: `Bedroom ${i}`, item: 'Walls - no holes, cracks, or stains', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-2`, category: `Bedroom ${i}`, item: 'Ceiling - no water stains or damage', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-3`, category: `Bedroom ${i}`, item: 'Flooring - no stains, tears, or damage', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-4`, category: `Bedroom ${i}`, item: 'Windows - glass intact, screens present', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-5`, category: `Bedroom ${i}`, item: 'Doors - locks and hinges working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-6`, category: `Bedroom ${i}`, item: 'Closet - rod and shelves intact', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-7`, category: `Bedroom ${i}`, item: 'Light fixtures and outlets working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `br-${i}-8`, category: `Bedroom ${i}`, item: 'Carpet/pad condition (if applicable)', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      const roomLabel = labels.bedrooms[i - 1] || `Bedroom ${i}`;
+      checklist.push({ id: `br-${i}-1`, category: roomLabel, item: 'Walls - no holes, cracks, or stains', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-2`, category: roomLabel, item: 'Ceiling - no water stains or damage', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-3`, category: roomLabel, item: 'Flooring - no stains, tears, or damage', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-4`, category: roomLabel, item: 'Windows - glass intact, screens present', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-5`, category: roomLabel, item: 'Doors - locks and hinges working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-6`, category: roomLabel, item: 'Closet - rod and shelves intact', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-7`, category: roomLabel, item: 'Light fixtures and outlets working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `br-${i}-8`, category: roomLabel, item: 'Carpet/pad condition (if applicable)', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
     }
 
     // Bathrooms
     for (let i = 1; i <= feats.bathrooms; i++) {
-      checklist.push({ id: `ba-${i}-1`, category: `Bathroom ${i}`, item: 'Toilet - bowl, seat, and tank working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-2`, category: `Bathroom ${i}`, item: 'Sink - faucet and drain working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-3`, category: `Bathroom ${i}`, item: 'Shower/tub - no cracks, grout intact', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-4`, category: `Bathroom ${i}`, item: 'Caulking - no mold or gaps', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-5`, category: `Bathroom ${i}`, item: 'Ventilation fan working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-6`, category: `Bathroom ${i}`, item: 'Mirrors and fixtures intact', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-7`, category: `Bathroom ${i}`, item: 'Floor - no tiles loose or cracked', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
-      checklist.push({ id: `ba-${i}-8`, category: `Bathroom ${i}`, item: 'Towel bars and accessories secure', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      const roomLabel = labels.bathrooms[i - 1] || `Bathroom ${i}`;
+      checklist.push({ id: `ba-${i}-1`, category: roomLabel, item: 'Toilet - bowl, seat, and tank working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-2`, category: roomLabel, item: 'Sink - faucet and drain working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-3`, category: roomLabel, item: 'Shower/tub - no cracks, grout intact', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-4`, category: roomLabel, item: 'Caulking - no mold or gaps', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-5`, category: roomLabel, item: 'Ventilation fan working', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-6`, category: roomLabel, item: 'Mirrors and fixtures intact', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-7`, category: roomLabel, item: 'Floor - no tiles loose or cracked', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
+      checklist.push({ id: `ba-${i}-8`, category: roomLabel, item: 'Towel bars and accessories secure', description: DEFAULT_DESCRIPTION, checked: false, attachments: [] });
     }
 
     // Kitchen
@@ -167,30 +186,38 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
     return checklist;
   }, []);
 
-  // Initialize items from initialData or generate fresh
-  useEffect(() => {
-    if (initialData?.items && initialData.items.length > 0) {
-      setItems(initialData.items);
-    } else {
-      setItems(generateItems(features));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  /** Merge a freshly generated checklist with previously saved inspection state */
+  const mergeItemState = useCallback((generated: MoveInChecklistItem[], previous: MoveInChecklistItem[]): MoveInChecklistItem[] => {
+    const previousById = new Map(previous.map(item => [item.id, item]));
+    return generated.map(item => {
+      const existing = previousById.get(item.id);
+      if (!existing) return item;
+      return {
+        ...item,
+        checked: existing.checked,
+        description: existing.description,
+        attachments: existing.attachments,
+      };
+    });
   }, []);
 
-  // Regenerate items when features change (only if no initial data was provided)
-  useEffect(() => {
-    if (!initialData?.items || initialData.items.length === 0) {
-      setItems(generateItems(features));
-    }
-  }, [features, generateItems, initialData?.items]);
+  const [items, setItems] = useState<MoveInChecklistItem[]>(() =>
+    mergeItemState(generateItems(features, roomLabels), initialData?.items || [])
+  );
 
-  const saveChecklistData = useCallback((updatedItems: MoveInChecklistItem[], updatedFeatures: PropertyFeatures, updatedExplanations: Record<string, string>, updatedAttachments: Attachment[]) => {
+  // Regenerate the checklist whenever the property features or room labels change (preserving inspection state)
+  useEffect(() => {
+    setItems(prev => mergeItemState(generateItems(features, roomLabels), prev));
+  }, [features, roomLabels, generateItems, mergeItemState]);
+
+  const saveChecklistData = useCallback((updatedItems: MoveInChecklistItem[], updatedFeatures: PropertyFeatures, updatedExplanations: Record<string, string>, updatedAttachments: Attachment[], updatedRoomLabels?: RoomLabels) => {
     if (onSave) {
       onSave({
         features: updatedFeatures,
         items: updatedItems,
         explanations: updatedExplanations,
         attachments: updatedAttachments,
+        roomLabels: updatedRoomLabels,
       });
     }
   }, [onSave]);
@@ -200,7 +227,7 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
       const updated = prev.map(item =>
         item.id === id ? { ...item, checked: !item.checked } : item
       );
-      saveChecklistData(updated, features, explanations, attachments);
+      saveChecklistData(updated, features, explanations, attachments, roomLabels);
       return updated;
     });
   };
@@ -208,7 +235,7 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
   const updateExplanation = (id: string, explanation: string) => {
     setExplanations(prev => {
       const updated = { ...prev, [id]: explanation };
-      saveChecklistData(items, features, updated, attachments);
+      saveChecklistData(items, features, updated, attachments, roomLabels);
       return updated;
     });
   };
@@ -216,7 +243,7 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
   const updateItemDescription = (id: string, description: string) => {
     setItems(prev => {
       const updated = prev.map(item => (item.id === id ? { ...item, description } : item));
-      saveChecklistData(updated, features, explanations, attachments);
+      saveChecklistData(updated, features, explanations, attachments, roomLabels);
       return updated;
     });
   };
@@ -224,14 +251,23 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
   const updateFeatures = (newFeatures: Partial<PropertyFeatures>) => {
     const updated = { ...features, ...newFeatures };
     setFeatures(updated);
-    if (initialData?.items && initialData.items.length > 0) {
-      saveChecklistData(items, updated, explanations, attachments);
-    }
+    // Rebuild the checklist to match the selected features and persist it
+    const regenerated = mergeItemState(generateItems(updated, roomLabels), items);
+    setItems(regenerated);
+    saveChecklistData(regenerated, updated, explanations, attachments, roomLabels);
+  };
+
+  const updateRoomLabels = (newLabels: RoomLabels) => {
+    setRoomLabels(newLabels);
+    // Rebuild the checklist to match the selected features and persist it
+    const regenerated = mergeItemState(generateItems(features, newLabels), items);
+    setItems(regenerated);
+    saveChecklistData(regenerated, features, explanations, attachments, newLabels);
   };
 
   const handleAttachmentsChange = (newAttachments: Attachment[]) => {
     setAttachments(newAttachments);
-    saveChecklistData(items, features, explanations, newAttachments);
+    saveChecklistData(items, features, explanations, newAttachments, roomLabels);
   };
 
   const downloadReport = () => {
@@ -309,11 +345,13 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
     URL.revokeObjectURL(url);
   };
 
-  const downloadAsPDF = () => {
-    const html = '<html><head><meta charset="UTF-8"><title>Report</title></head><body><h1>Move-In Condition Report</h1><p>Property: ' + (property.address || '') + '</p></body></html>';
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+  const previewAsPDF = () => {
+    try {
+      previewMoveInChecklistPDF(property, features, items, explanations, attachments, roomLabels);
+    } catch (error) {
+      console.error('Error generating PDF preview:', error);
+      alert('Error generating PDF preview. Please allow pop-ups and try again.');
+    }
   };
 
   const itemsByCategory: Record<string, MoveInChecklistItem[]> = {};
@@ -334,7 +372,7 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
             Download as TXT
           </button>
           <button
-            onClick={downloadAsPDF}
+            onClick={previewAsPDF}
             className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
           >
             Preview as PDF
@@ -429,6 +467,86 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
             <label htmlFor="pool" className="text-xs text-gray-700">Pool</label>
           </div>
         </div>
+        
+        {/* Bedroom labels */}
+        {features.bedrooms > 0 && (
+          <div className="mb-4 mt-4">
+            <label className="text-xs font-medium text-gray-700 block mb-1">Bedroom Names</label>
+            <div className="space-y-2">
+              {roomLabels.bedrooms.map((label, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={label}
+                    onChange={(e) => {
+                      const newBedrooms = [...roomLabels.bedrooms];
+                      newBedrooms[index] = e.target.value;
+                      updateRoomLabels({ ...roomLabels, bedrooms: newBedrooms });
+                    }}
+                    placeholder={`Bedroom ${index + 1}`}
+                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+                  />
+                </div>
+              ))}
+              {/* Add empty inputs for new bedrooms */}
+              {Array.from({ length: features.bedrooms - roomLabels.bedrooms.length }).map((_, index) => (
+                <div key={`br-${index}`} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={roomLabels.bedrooms[roomLabels.bedrooms.length + index] || ''}
+                    onChange={(e) => {
+                      const newBedrooms = [...roomLabels.bedrooms];
+                      newBedrooms[roomLabels.bedrooms.length + index] = e.target.value;
+                      updateRoomLabels({ ...roomLabels, bedrooms: newBedrooms });
+                    }}
+                    placeholder={`Bedroom ${roomLabels.bedrooms.length + index + 1}`}
+                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Bathroom labels */}
+        {features.bathrooms > 0 && (
+          <div className="mb-4">
+            <label className="text-xs font-medium text-gray-700 block mb-1">Bathroom Names</label>
+            <div className="space-y-2">
+              {roomLabels.bathrooms.map((label, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={label}
+                    onChange={(e) => {
+                      const newBathrooms = [...roomLabels.bathrooms];
+                      newBathrooms[index] = e.target.value;
+                      updateRoomLabels({ ...roomLabels, bathrooms: newBathrooms });
+                    }}
+                    placeholder={`Bathroom ${index + 1}`}
+                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+                  />
+                </div>
+              ))}
+              {/* Add empty inputs for new bathrooms */}
+              {Array.from({ length: features.bathrooms - roomLabels.bathrooms.length }).map((_, index) => (
+                <div key={`ba-${index}`} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={roomLabels.bathrooms[roomLabels.bathrooms.length + index] || ''}
+                    onChange={(e) => {
+                      const newBathrooms = [...roomLabels.bathrooms];
+                      newBathrooms[roomLabels.bathrooms.length + index] = e.target.value;
+                      updateRoomLabels({ ...roomLabels, bathrooms: newBathrooms });
+                    }}
+                    placeholder={`Bathroom ${roomLabels.bathrooms.length + index + 1}`}
+                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <p className="text-sm text-gray-600 mb-4">
@@ -483,7 +601,7 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
                                   : it
                               );
                               setItems(updated);
-                              saveChecklistData(updated, features, explanations, attachments);
+                              saveChecklistData(updated, features, explanations, attachments, roomLabels);
                             };
                             reader.readAsDataURL(file);
                           }
@@ -523,12 +641,6 @@ export default function MoveInConditionChecklist({ property, initialData, onSave
         <p>Complete this checklist together with the landlord/property manager before move-in. Both parties should sign the report to document the property condition. This protects both the tenant and landlord regarding security deposit deductions.</p>
       </div>
 
-      <div className="mt-4">
-        <DocumentAttachments
-          attachments={attachments}
-          onAttachmentsChange={handleAttachmentsChange}
-        />
-      </div>
     </div>
   );
 }

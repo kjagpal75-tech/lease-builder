@@ -391,7 +391,7 @@ export default function LeaseBuilder() {
                 {currentLease.landlords.map((landlord, index) => (
                   <div key={index} className="text-gray-600">
                     <p>{landlord.name}</p>
-                    <p className="text-xs">{landlord.phone}</p>
+                    <p className="text-xs">Ph: {landlord.phone} Em: {landlord.email}</p>
                   </div>
                 ))}
               </div>
@@ -400,7 +400,7 @@ export default function LeaseBuilder() {
                 {currentLease.tenants.map((tenant, index) => (
                   <div key={index} className="text-gray-600">
                     <p>{tenant.name}</p>
-                    <p className="text-xs">{tenant.phone}</p>
+                    <p className="text-xs">Ph: {tenant.phone} Em: {tenant.email}</p>
                   </div>
                 ))}
               </div>

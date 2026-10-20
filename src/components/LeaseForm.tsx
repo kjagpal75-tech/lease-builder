@@ -463,7 +463,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                   required
                   value={landlord.phone}
                   onChange={(e) => handlePhoneChange('landlord', e.target.value, index)}
-                  placeholder="(XXX) XXX-XXXX"
+                  placeholder="Ph: (XXX) xxx-xxx-xxxx"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
                 />
               </div>
@@ -550,7 +550,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                   required
                   value={tenant.phone}
                   onChange={(e) => handlePhoneChange('tenant', e.target.value, index)}
-                  placeholder="(XXX) XXX-XXXX"
+                  placeholder="Ph: (XXX) XXX-XXXX"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
                 />
               </div>
@@ -913,7 +913,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                     updated[index] = { ...updated[index], phone: formatPhoneNumber(e.target.value) };
                     setCoSigners(updated);
                   }}
-                  placeholder="(XXX) XXX-XXXX"
+                  placeholder="Ph: (XXX) XXX-XXXX"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
                 />
               </div>
@@ -943,7 +943,7 @@ export default function LeaseForm({ onSave, initialData }: LeaseFormProps) {
                     updated[index] = { ...updated[index], email: e.target.value };
                     setCoSigners(updated);
                   }}
-                  placeholder="email@example.com"
+                  placeholder="Em: xzy@abc.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-600 bg-white"
                 />
               </div>

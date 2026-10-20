@@ -120,13 +120,14 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   const landlordInfo = landlords.map((l, i) => `
     <li><strong>${i + 1}. ${l.name}</strong></li>
     <li>${l.address}</li>
-    <li>Phone: ${l.phone} | Email: ${l.email}</li>
+    <li>Ph: ${l.phone} Em: ${l.email}</li>
     ${i < landlords.length - 1 ? '<li style="margin-top:6px;"></li>' : ''}
   `).join('');
 
   // Build tenant info with full details matching preview
   const tenantInfo = tenants.map((t, i) => `
-    <li><strong>${i + 1}. ${t.name}</strong> (${t.phone})</li>
+    <li><strong>${i + 1}. ${t.name}</strong> </li>
+    <li>Ph: ${t.phone} Em: ${t.email}</li>
   `).join('');
 
   // Co-signer block matching preview exactly
@@ -134,7 +135,9 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <div class="card">
       <div class="card-title">Co-Signer / Guarantor</div>
       <ul class="info-list">
-        <li><strong>${coSigners[0].name}</strong> &bull; ${coSigners[0].address} &bull; Phone: ${coSigners[0].phone} &bull; Email: ${coSigners[0].email}</li>
+        <li><strong>${coSigners[0].name}</strong></li>
+        <li>${coSigners[0].address}</li>
+        <li>Ph: ${coSigners[0].phone} Em: ${coSigners[0].email}</li>
       </ul>
       <div style="font-size: 8.5pt; color: #4a5568; margin-top: 6px; text-align: justify;">
         <strong>Co-Signer Guarantee & Responsibilities (Nevada Revised Statutes):</strong> The co-signer unconditionally guarantees the full and timely performance of all tenant obligations under this Lease, including rent, fees, and damages. Held jointly and severally liable; liability extends to full term and renewals unless released in writing. Landlord may pursue remedies directly against co-signer without first exhausting tenant remedies.
@@ -574,7 +577,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <h2>3. Occupants & Utilities</h2>
         <table class="table-summary">
             <tr>
-                <th>Authorized Tenants & Occupants</th>
+                <th>Authorized Occupants</th>
                 <td>${tenants.map(t => t.name).join(', ')}</td>
             </tr>
             ${property.state === 'CA' ? `
@@ -695,8 +698,7 @@ function buildProfessionalHTML(lease: LeaseDocument, sections: Record<string, st
       <div class="info-value">
         <strong>${escapeHtml(landlord.name)}</strong><br>
         ${escapeHtml(landlord.address)}<br>
-        Phone: ${escapeHtml(landlord.phone)}<br>
-        Email: ${escapeHtml(landlord.email)}
+        Ph: ${escapeHtml(landlord.phone)} Em: ${escapeHtml(landlord.email)}
       </div>
     </div>
   `).join('');
@@ -708,8 +710,7 @@ function buildProfessionalHTML(lease: LeaseDocument, sections: Record<string, st
       <div class="info-value">
         <strong>${escapeHtml(tenant.name)}</strong><br>
         ${escapeHtml(tenant.address)}<br>
-        Phone: ${escapeHtml(tenant.phone)}<br>
-        Email: ${escapeHtml(tenant.email)}
+        Ph: ${escapeHtml(tenant.phone)} Em: ${escapeHtml(tenant.email)}
       </div>
     </div>
   `).join('');

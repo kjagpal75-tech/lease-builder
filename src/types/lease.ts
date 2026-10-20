@@ -202,6 +202,11 @@ export interface MoveInChecklistData {
   items: MoveInChecklistItem[];
   explanations: Record<string, string>;
   attachments: Attachment[];
+  /** Optional per-room labels used to disambiguate bedrooms and bathrooms in the checklist. */
+  roomLabels?: {
+    bedrooms: string[];
+    bathrooms: string[];
+  };
 }
 
 export interface LeaseDocument {

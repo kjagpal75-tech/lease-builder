@@ -38,15 +38,13 @@ export const generateLeaseText = (lease: LeaseDocument): string => {
   const landlordText = landlords.map((landlord, index) => 
     `LANDLORD${landlords.length > 1 ? ` ${index + 1}` : ''}: ${landlord.name}
 ${landlord.address}
-Phone: ${landlord.phone}
-Email: ${landlord.email}`
+Ph: ${landlord.phone} Em: ${landlord.email}`
   ).join('\n\n');
 
   const tenantText = tenants.map((tenant, index) => 
     `TENANT${tenants.length > 1 ? ` ${index + 1}` : ''}: ${tenant.name}
 ${tenant.address}
-Phone: ${tenant.phone}
-Email: ${tenant.email}`
+Ph: ${tenant.phone} Em: ${tenant.email}`
   ).join('\n\n');
 
   const leaseText = `
@@ -67,8 +65,7 @@ The following co-signer(s) guarantee the obligations of the Tenant(s) under this
 ${coSigners.map((coSigner, index) => 
   `CO-SIGNER ${coSigners.length > 1 ? index + 1 : ''}: ${coSigner.name}
 ${coSigner.address}
-Phone: ${coSigner.phone}
-Email: ${coSigner.email}
+Ph: ${coSigner.phone} Em: ${coSigner.email}
 ${coSigner.relationship ? `Relationship to Tenant: ${coSigner.relationship}` : ''}`
 ).join('\n\n')}
 
