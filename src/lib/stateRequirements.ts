@@ -309,10 +309,7 @@ export const getApplicableDisclosures = (property: Property): ApplicableDisclosu
           : `Property year built (${property.yearBuilt}) is before 1981 — asbestos advisory included`,
         leaseText: [
           'ASBESTOS ADVISORY',
-          flags.knownAsbestos
-            ? 'Landlord discloses that asbestos-containing materials are known or believed to be present at the property. Tenant shall not disturb suspect materials and shall notify Landlord before any alterations.'
-            : 'Buildings constructed before 1981 may contain asbestos-containing materials. Tenant shall not sand, drill, or otherwise disturb suspect materials and shall notify Landlord before alterations that may disturb building materials.',
-          'Landlord has no knowledge of asbestos-containing materials at the property except as otherwise disclosed in writing, and has provided Tenant any available records or reports pertaining to asbestos.',
+          'Landlord has no actual knowledge, records, or reports of asbestos-containing materials at the property, and none are known to be present. Tenant shall not disturb any suspect structural materials and shall immediately notify Landlord in writing before making any alterations to the premises.',
         ].join('\n'),
       });
     }
