@@ -191,7 +191,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
   // Nevada-specific sections
   const nevadaSections = property.state === 'NV' ? `
     <h2>5. Lease Terms & Conditions</h2>
-    <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
+    <p><strong>Use of Premises:</strong> Solely as a private residential dwelling. No commercial business, retail operations, or client-facing business activities shall be conducted on the premises. Tenant must comply with all local, state, and federal laws and regulations.</p>
     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
     <h2>6. Default and Remedies</h2>
     <div class="card">
@@ -229,7 +229,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
     <p><strong>Foreclosure Disclosure (NRS 118A.275):</strong> Landlord discloses property is NOT currently subject to foreclosure proceedings.</p>
   ` : `
     <h2>5. Lease Terms & Conditions</h2>
-    <p><strong>Use of Premises:</strong> Solely as a private residence complying with all laws and regulations.</p>
+    <p><strong>Use of Premises:</strong> Solely as a private residential dwelling. No commercial business, retail operations, or client-facing business activities shall be conducted on the premises. Tenant must comply with all local, state, and federal laws and regulations.</p>
     <p><strong>Maintenance & Landlord Entry:</strong> Tenant shall maintain clean and sanitary conditions. Landlord may enter with 24-hour notice for inspections/repairs/showings, or without notice in emergencies.</p>
     ${property.state === 'CA' ? `
     <p><strong>Move-In/Move-Out Inspection & Baseline:</strong> The physical condition and cleanliness of the Premises at move-out will be evaluated against the initial signed Move-In Inventory and Condition Record, along with baseline documentation and photographs established at commencement.</p>
@@ -577,7 +577,7 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
         <h2>3. Occupants & Utilities</h2>
         <table class="table-summary">
             <tr>
-                <th>Authorized Occupants</th>
+                <th>Authorized Tenants and Occupants</th>
                 <td>${tenants.map(t => t.name).join(', ')}</td>
             </tr>
             ${property.state === 'CA' ? `
@@ -642,13 +642,8 @@ export const generateProfessionalLeaseHTML = (lease: LeaseDocument): string => {
 
         <div class="legal-notice">
             <h4>Legal & Digital Signature Notice</h4>
-            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA).
-            <ul>
-                <li>Signature records include timestamp, IP address, user agent, and signature image audit trails.</li>
-                <li>This document is provided for informational purposes; parties should consult legal counsel for compliance.</li>
-            </ul>
+            This document was generated electronically and contains digital signature frameworks. Digital signatures are legally binding in California under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and the Uniform Electronic Transactions Act (UETA). Signature records include timestamp, IP address, user agent, and signature image audit trails.
         </div>
-
     </div>
 
 </body>
